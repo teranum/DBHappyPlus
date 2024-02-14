@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<LangVersion>default</LangVersion>
+		<TargetFrameworks>netstandard2.0</TargetFrameworks>
+		<PlatformTarget>AnyCPU</PlatformTarget>
+		<Description>Common wrapper for HappyPlusGlobal OpenApi OCX version</Description>
+		<Version>0.0.1-pre1</Version>
+		<Title>DBOpenApiW.NET</Title>
+		<PackageTags>DB, DBOA</PackageTags>
+		<Authors>teranum</Authors>
+		<Copyright>Copyright © teranum 2024</Copyright>
+		<RepositoryUrl>https://github.com/teranum/DBHappyPlus/DBOpenApiW.NET</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageProjectUrl>https://github.com/teranum/DBHappyPlus/DBOpenApiW.NET</PackageProjectUrl>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<Company>$(Authors)</Company>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="icon.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+</Project>
