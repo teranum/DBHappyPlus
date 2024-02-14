@@ -10,9 +10,9 @@
 		<PackageTags>DB, DBOA</PackageTags>
 		<Authors>teranum</Authors>
 		<Copyright>Copyright © teranum 2024</Copyright>
-		<RepositoryUrl>https://github.com/teranum/DBHappyPlus/DBOpenApiW.NET</RepositoryUrl>
+		<RepositoryUrl>https://github.com/teranum/DBHappyPlus/tree/master/DBOpenApiW.NET</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<PackageProjectUrl>https://github.com/teranum/DBHappyPlus/DBOpenApiW.NET</PackageProjectUrl>
+		<PackageProjectUrl>https://github.com/teranum/DBHappyPlus/tree/master/DBOpenApiW.NET</PackageProjectUrl>
 		<PackageIcon>icon.png</PackageIcon>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<Company>$(Authors)</Company>

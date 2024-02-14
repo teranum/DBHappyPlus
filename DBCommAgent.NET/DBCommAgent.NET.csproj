@@ -10,9 +10,9 @@
 		<PackageTags>DB, DBOA</PackageTags>
 		<Authors>teranum</Authors>
 		<Copyright>Copyright © teranum 2024</Copyright>
-		<RepositoryUrl>https://github.com/teranum/DBHappyPlus/DBCommAgent.NET</RepositoryUrl>
+		<RepositoryUrl>https://github.com/teranum/DBHappyPlus/tree/master/DBCommAgent.NET</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<PackageProjectUrl>https://github.com/teranum/DBHappyPlus/DBCommAgent.NET</PackageProjectUrl>
+		<PackageProjectUrl>https://github.com/teranum/DBHappyPlus/tree/master/DBCommAgent.NET</PackageProjectUrl>
 		<PackageIcon>icon.png</PackageIcon>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<Company>$(Authors)</Company>
