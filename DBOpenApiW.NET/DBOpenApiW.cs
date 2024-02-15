@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DBOpenApiW.NET
 {
@@ -648,7 +651,7 @@ namespace DBOpenApiW.NET
     //[Clsid("{fc13e42d-e584-419a-a54b-402bc213a44b}")]
     public class AxDBOpenApiW
     {
-        private _DDBOpenApiW ocx;
+        private readonly _DDBOpenApiW ocx;
 
         //private AxDBOpenApiWEventMulticaster eventMulticaster;
 
@@ -1314,6 +1317,15 @@ namespace DBOpenApiW.NET
 
         internal void RaiseOnOnReceiveTrData(object sender, _DDBOpenApiWEvents_OnReceiveTrDataEvent e)
         {
+            int async_ident_id = AsyncNode.GetIdentId([e.sRQName, e.sTrCode]);
+            var async_node = _async_list.Find(x => x._ident_id == async_ident_id);
+            if (async_node is not null)
+            {
+                _async_list.Remove(async_node);
+                async_node._async_tr_action?.Invoke(e);
+                async_node._async_wait.Set();
+                return;
+            }
             OnReceiveTrData?.Invoke(sender, e);
         }
 
@@ -1339,6 +1351,15 @@ namespace DBOpenApiW.NET
 
         internal void RaiseOnOnDBOAReceiveTrData(object sender, _DDBOpenApiWEvents_OnDBOAReceiveTrDataEvent e)
         {
+            int async_ident_id = AsyncNode.GetIdentId([e.sUserID, e.sRQName, e.sTrCode]);
+            var async_node = _async_list.Find(x => x._ident_id == async_ident_id);
+            if (async_node is not null)
+            {
+                _async_list.Remove(async_node);
+                async_node._async_dboa_tr_action?.Invoke(e);
+                async_node._async_wait.Set();
+                return;
+            }
             OnDBOAReceiveTrData?.Invoke(sender, e);
         }
 
@@ -1461,5 +1482,80 @@ namespace DBOpenApiW.NET
                 }
             }
         }
+
+        #region 비동기 확장함수 추가
+        class AsyncNode(string[] strings)
+        {
+            public readonly int _ident_id = GetIdentId(strings);
+
+            public static int GetIdentId(string[] strings)
+            {
+                int id = 0;
+                for (int i = 0; i < strings.Length; i++)
+                {
+                    id = id * 31 + StringComparer.Ordinal.GetHashCode(strings[i]);
+                }
+                return id;
+            }
+
+            public readonly ManualResetEvent _async_wait = new(initialState: false);
+            public Action<_DDBOpenApiWEvents_OnDBOAReceiveTrDataEvent> _async_dboa_tr_action = null;
+            public Action<_DDBOpenApiWEvents_OnReceiveTrDataEvent> _async_tr_action = null;
+        }
+
+        List<AsyncNode> _async_list = [];
+
+        public virtual async Task<int> DBOACommRqDataAsync(string sUserID, string sRQName, string sTrCode, string sPrevNext, string sScreenNo, Action<_DDBOpenApiWEvents_OnDBOAReceiveTrDataEvent> action)
+        {
+            var newAsync = new AsyncNode([sUserID, sRQName, sTrCode])
+            {
+                _async_dboa_tr_action = action,
+            };
+            _async_list.Add(newAsync);
+
+            int nRet = DBOACommRqData(sUserID, sRQName, sTrCode, sPrevNext, sScreenNo);
+            if (nRet == 0)
+            {
+                Task taskAsync = Task.Run(() =>
+                {
+                    if (!newAsync._async_wait.WaitOne(5000))
+                    {
+                        // 5초 대기후에도 이벤트가 발생하지 않으면 -902 리턴
+                        nRet = -902;
+                    }
+                });
+                await taskAsync.ConfigureAwait(true);
+            }
+            _async_list.Remove(newAsync);
+            return nRet;
+        }
+
+        public virtual async Task<int> CommRqDataAsync(string sRQName, string sTrCode, string sPrevNext, string sScreenNo, Action<_DDBOpenApiWEvents_OnReceiveTrDataEvent> action)
+        {
+            var newAsync = new AsyncNode([sRQName, sTrCode])
+            {
+                _async_tr_action = action,
+            };
+            _async_list.Add(newAsync);
+
+            int nRet = CommRqData(sRQName, sTrCode, sPrevNext, sScreenNo);
+            if (nRet == 0)
+            {
+                Task taskAsync = Task.Run(() =>
+                {
+                    if (!newAsync._async_wait.WaitOne(5000))
+                    {
+                        // 5초 대기후에도 이벤트가 발생하지 않으면 -902 리턴
+                        nRet = -902;
+                    }
+                });
+                await taskAsync.ConfigureAwait(true);
+            }
+            _async_list.Remove(newAsync);
+            return nRet;
+        }
+
+        #endregion
     }
+
 }

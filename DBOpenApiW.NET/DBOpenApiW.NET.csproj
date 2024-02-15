@@ -5,7 +5,7 @@
 		<TargetFrameworks>netstandard2.0</TargetFrameworks>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<Description>Common wrapper for HappyPlusGlobal OpenApi OCX version</Description>
-		<Version>1.0.0</Version>
+		<Version>1.0.1</Version>
 		<Title>DBOpenApiW.NET</Title>
 		<PackageTags>DB, DBOA</PackageTags>
 		<Authors>teranum</Authors>
