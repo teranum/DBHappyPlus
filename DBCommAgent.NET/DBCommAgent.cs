@@ -927,7 +927,7 @@ namespace DBCommAgent.NET
 
             if (AtlAxWinInit())
             {
-                hWndContainer = CreateWindowEx(0, "AtlAxWin", clsid, WS_VISIBLE | WS_CHILD, -100, -100, 20, 20, hWndParent, (IntPtr)9001, IntPtr.Zero, IntPtr.Zero);
+                hWndContainer = CreateWindowEx(0, "AtlAxWin", clsid, WS_VISIBLE | WS_CHILD, -100, -100, 20, 20, hWndParent, (IntPtr)9003, IntPtr.Zero, IntPtr.Zero);
                 if (hWndContainer != IntPtr.Zero)
                 {
                     try
