@@ -28,7 +28,7 @@ using DBOpenApiW.NET;
 
     // 비동기 요청
     private async Task TestAsync()
-	{
+    {
         // 차트데이터 연속조회, 30분봉 종가 받을수 있을때까지 무한 반복
         List<string> price_list = []; // 종가 리스트
         string sPreNext = string.Empty;
@@ -61,7 +61,7 @@ using DBOpenApiW.NET;
         Debug.WriteLine($"all Data received: {price_list.Count}");
 
         ... // 수집된 종가 데이터 처리
-	}
+    }
 
 
 ```
