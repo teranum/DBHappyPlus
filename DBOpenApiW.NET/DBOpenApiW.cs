@@ -1678,7 +1678,7 @@ namespace DBOpenApiW.NET
 
         internal void RaiseOnOnReceiveTrData(object sender, _DDBOpenApiWEvents_OnReceiveTrDataEvent e)
         {
-            int async_ident_id = AsyncNode.GetIdentId([e.sRQName, e.sTrCode]);
+            int async_ident_id = AsyncNode.GetIdentId([e.sRQName, e.sTrCode, int.Parse(e.sScrNo)]);
             var async_node = _async_list.Find(x => x._ident_id == async_ident_id);
             if (async_node is not null)
             {
@@ -1712,7 +1712,7 @@ namespace DBOpenApiW.NET
 
         internal void RaiseOnOnDBOAReceiveTrData(object sender, _DDBOpenApiWEvents_OnDBOAReceiveTrDataEvent e)
         {
-            int async_ident_id = AsyncNode.GetIdentId([e.sUserID, e.sRQName, e.sTrCode]);
+            int async_ident_id = AsyncNode.GetIdentId([e.sUserID, e.sRQName, e.sTrCode, int.Parse(e.sScrNo)]);
             var async_node = _async_list.Find(x => x._ident_id == async_ident_id);
             if (async_node is not null)
             {
@@ -1892,22 +1892,21 @@ namespace DBOpenApiW.NET
         /// <summary>
         /// 비동기로 데이터를 요청한다.
         /// </summary>
-        /// <param name="sUserID">사용자ID</param>
         /// <param name="sRQName">사용자 구분명칭</param>
         /// <param name="sTrCode">Transaction Code</param>
         /// <param name="sPrevNext">서버에서 내려준 Next키값 입력(샘플참조)</param>
         /// <param name="sScreenNo">4자리의 화면번호(1~9999 :숫자값으로만 가능)</param>
         /// <param name="action">이벤트 콜백 함수</param>
         /// <returns>0:성공, 이외 값은 실패, -902: 타임아웃</returns>
-        public virtual async Task<int> DBOACommRqDataAsync(string sUserID, string sRQName, string sTrCode, string sPrevNext, string sScreenNo, Action<_DDBOpenApiWEvents_OnDBOAReceiveTrDataEvent> action)
+        public virtual async Task<int> CommRqDataAsync(string sRQName, string sTrCode, string sPrevNext, string sScreenNo, Action<_DDBOpenApiWEvents_OnReceiveTrDataEvent> action)
         {
-            var newAsync = new AsyncNode([sUserID, sRQName, sTrCode])
+            var newAsync = new AsyncNode([sRQName, sTrCode, int.Parse(sScreenNo)])
             {
-                _async_dboa_tr_action = action,
+                _async_tr_action = action,
             };
             _async_list.Add(newAsync);
 
-            int nRet = DBOACommRqData(sUserID, sRQName, sTrCode, sPrevNext, sScreenNo);
+            int nRet = CommRqData(sRQName, sTrCode, sPrevNext, sScreenNo);
             if (nRet == 0)
             {
                 bool bTimeOut = false;
@@ -1931,21 +1930,22 @@ namespace DBOpenApiW.NET
         /// <summary>
         /// 비동기로 데이터를 요청한다.
         /// </summary>
+        /// <param name="sUserID">사용자ID</param>
         /// <param name="sRQName">사용자 구분명칭</param>
         /// <param name="sTrCode">Transaction Code</param>
         /// <param name="sPrevNext">서버에서 내려준 Next키값 입력(샘플참조)</param>
         /// <param name="sScreenNo">4자리의 화면번호(1~9999 :숫자값으로만 가능)</param>
         /// <param name="action">이벤트 콜백 함수</param>
         /// <returns>0:성공, 이외 값은 실패, -902: 타임아웃</returns>
-        public virtual async Task<int> CommRqDataAsync(string sRQName, string sTrCode, string sPrevNext, string sScreenNo, Action<_DDBOpenApiWEvents_OnReceiveTrDataEvent> action)
+        public virtual async Task<int> DBOACommRqDataAsync(string sUserID, string sRQName, string sTrCode, string sPrevNext, string sScreenNo, Action<_DDBOpenApiWEvents_OnDBOAReceiveTrDataEvent> action)
         {
-            var newAsync = new AsyncNode([sRQName, sTrCode])
+            var newAsync = new AsyncNode([sUserID, sRQName, sTrCode, int.Parse(sScreenNo)])
             {
-                _async_tr_action = action,
+                _async_dboa_tr_action = action,
             };
             _async_list.Add(newAsync);
 
-            int nRet = CommRqData(sRQName, sTrCode, sPrevNext, sScreenNo);
+            int nRet = DBOACommRqData(sUserID, sRQName, sTrCode, sPrevNext, sScreenNo);
             if (nRet == 0)
             {
                 bool bTimeOut = false;
