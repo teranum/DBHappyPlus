@@ -605,6 +605,9 @@ namespace DBCommAgent.NET
             return ocx.GetCommRecvOptionValue(nOptionType);
         }
 
+        /// <summary>ReleaseRqId</summary>
+        /// <param name="nRqId">조회고유ID</param>
+        /// <exception cref="InvalidActiveXStateException"></exception>
         public virtual void ReleaseRqId(int nRqId)
         {
             if (ocx == null)
@@ -1021,6 +1024,8 @@ namespace DBCommAgent.NET
             ocx.SetOffAgentMessageBox(nOption);
         }
 
+        /// <summary>SetOptionalFunction</summary>
+        /// <exception cref="InvalidActiveXStateException"></exception>
         public virtual string SetOptionalFunction(int nOption, int nValue1, int nValue2, string strValue1, string strValue2)
         {
             if (ocx == null)
@@ -1079,6 +1084,8 @@ namespace DBCommAgent.NET
             return ocx.GetUserAccNo(nIndex);
         }
 
+        /// <summary>GetLBSIPList</summary>
+        /// <exception cref="InvalidActiveXStateException"></exception>
         public virtual string GetLBSIPList()
         {
             if (ocx == null)
@@ -1104,6 +1111,8 @@ namespace DBCommAgent.NET
             ocx.SetConnectIPList(strIP);
         }
 
+        /// <summary>SetChangePort</summary>
+        /// <exception cref="InvalidActiveXStateException"></exception>
         public virtual void SetChangePort(int bChangePort)
         {
             if (ocx == null)
