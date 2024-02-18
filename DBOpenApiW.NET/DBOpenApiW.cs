@@ -1678,7 +1678,7 @@ namespace DBOpenApiW.NET
 
         internal void RaiseOnOnReceiveTrData(object sender, _DDBOpenApiWEvents_OnReceiveTrDataEvent e)
         {
-            int async_ident_id = AsyncNode.GetIdentId([e.sRQName, e.sTrCode, e.sScrNo]);
+            int async_ident_id = AsyncNode.GetIdentId([e.sRQName, e.sTrCode]);
             var async_node = _async_list.Find(x => x._ident_id == async_ident_id);
             if (async_node is not null)
             {
@@ -1712,7 +1712,7 @@ namespace DBOpenApiW.NET
 
         internal void RaiseOnOnDBOAReceiveTrData(object sender, _DDBOpenApiWEvents_OnDBOAReceiveTrDataEvent e)
         {
-            int async_ident_id = AsyncNode.GetIdentId([e.sUserID, e.sRQName, e.sTrCode, e.sScrNo]);
+            int async_ident_id = AsyncNode.GetIdentId([e.sUserID, e.sRQName, e.sTrCode]);
             var async_node = _async_list.Find(x => x._ident_id == async_ident_id);
             if (async_node is not null)
             {
@@ -1901,7 +1901,7 @@ namespace DBOpenApiW.NET
         /// <returns>0:성공, 이외 값은 실패, -902: 타임아웃</returns>
         public virtual async Task<int> DBOACommRqDataAsync(string sUserID, string sRQName, string sTrCode, string sPrevNext, string sScreenNo, Action<_DDBOpenApiWEvents_OnDBOAReceiveTrDataEvent> action)
         {
-            var newAsync = new AsyncNode([sUserID, sRQName, sTrCode, sScreenNo])
+            var newAsync = new AsyncNode([sUserID, sRQName, sTrCode])
             {
                 _async_dboa_tr_action = action,
             };
@@ -1939,7 +1939,7 @@ namespace DBOpenApiW.NET
         /// <returns>0:성공, 이외 값은 실패, -902: 타임아웃</returns>
         public virtual async Task<int> CommRqDataAsync(string sRQName, string sTrCode, string sPrevNext, string sScreenNo, Action<_DDBOpenApiWEvents_OnReceiveTrDataEvent> action)
         {
-            var newAsync = new AsyncNode([sRQName, sTrCode, sScreenNo])
+            var newAsync = new AsyncNode([sRQName, sTrCode])
             {
                 _async_tr_action = action,
             };
