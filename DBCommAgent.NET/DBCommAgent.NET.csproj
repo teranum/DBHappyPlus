@@ -5,7 +5,7 @@
 		<TargetFrameworks>netstandard2.0</TargetFrameworks>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<Description>Common wrapper for DBHappyPlus OpenApi</Description>
-		<Version>1.0.0</Version>
+		<Version>1.0.2</Version>
 		<Title>DBCommAgent.NET</Title>
 		<PackageTags>DB, DBOA, HappyPlus</PackageTags>
 		<Authors>teranum</Authors>
@@ -17,7 +17,7 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<Company>$(Authors)</Company>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<NoWarn>$(NoWarn);MA0091</NoWarn>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>
