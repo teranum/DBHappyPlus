@@ -1,4 +1,5 @@
 ﻿using ConsoleApp_DBCommAgent;
+using DBCommAgent.NET;
 
 namespace ConsoleApp;
 
