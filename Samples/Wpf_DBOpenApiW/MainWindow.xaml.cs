@@ -156,9 +156,7 @@ namespace WpfApp1
                 {
                     int repeatCount = api.DBOAGetRepeatCnt(UserId, e.sTrCode, e.sRecordName);
                     for (int i = 0; i < repeatCount; i++)
-                    {
                         price_list.Add(api.DBOAGetCommData(UserId, e.sTrCode, e.sRecordName, i, "현재가"));
-                    }
                 });
                 if (result < 0)
                 {
