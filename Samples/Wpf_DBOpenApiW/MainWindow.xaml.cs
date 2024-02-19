@@ -145,6 +145,34 @@ namespace WpfApp1
                 OutLog($"all Data received: {price_list.Count}");
                 //Logs.Concat(price_list);
             }
+            else if (content.Equals("시세요청"))
+            {
+                // 일자별시세요청으로 종목의 실시간 시세 받기
+                // 화면번호는 0011 으로 고정
+                List<string> price_list = []; // 종가 리스트
+                api.DBOASetInputValue(UserId, "종목코드", ItemCode);
+                int result = await api.DBOACommRqDataAsync(UserId, "차트요청", "pibo7014", string.Empty, "0011",
+                (e) =>
+                {
+                    int repeatCount = api.DBOAGetRepeatCnt(UserId, e.sTrCode, e.sRecordName);
+                    for (int i = 0; i < repeatCount; i++)
+                    {
+                        price_list.Add(api.DBOAGetCommData(UserId, e.sTrCode, e.sRecordName, i, "종가"));
+                    }
+                });
+                if (result < 0)
+                {
+                    OutLog($"returned DBOAGetCommData: {result}");
+                    return; // 요청 오류시 중단
+                }
+
+                OutLog($"Data received: {price_list.Count}");
+            }
+            else if (content.Equals("시세중지"))
+            {
+                int result = api.DBOADisconnectRealData(UserId, "0011");
+                OutLog($"returned  DBOADisconnectRealData: {result}");
+            }
         }
     }
 }

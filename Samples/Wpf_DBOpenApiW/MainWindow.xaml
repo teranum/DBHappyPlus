@@ -67,7 +67,17 @@
                 CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}"
                 Content="30분 차트요청" />
             <Button
-                Margin="30,0,10,0"
+                Margin="0,0,10,0"
+                Command="{Binding ReqCommand}"
+                CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}"
+                Content="시세요청" />
+            <Button
+                Margin="0,0,10,0"
+                Command="{Binding ReqCommand}"
+                CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}"
+                Content="시세중지" />
+            <Button
+                Margin="10,0,10,0"
                 Command="{Binding ClearCommand}"
                 Content="지우기" />
         </StackPanel>
