@@ -124,7 +124,8 @@ namespace WpfApp1
             }
             else if (content.Equals("지수차트요청"))
             {
-                string code = "101WC000"; // 국내지수 선물코드
+                List<(double T, double O, double H, double L, double C, double V)> chartDatas = [];
+                string code = "101V3000"; // 국내지수 선물코드
                 string date = DateTime.Today.ToString("yyyyMMdd");
                 int nReturn = await api.RequestFidArrayAsync(
                     [
@@ -134,18 +135,24 @@ namespace WpfApp1
                     ("9035", date),
                     ("9119", "3600"), // 60분봉
                     ("GID", "1005"),
-                    ], "9,8,4,13,14,15,83,11", "0", "", "9999", 10,
+                    ], "9,8,13,14,15,4,83", "0", "", "9999", 100,
                     (ov, e) =>
                     {
-                        int nRowCnt = api.GetFidOutputRowCnt(e.nRequestId);
-                        OutLog($"지수차트요청 [{code}]: nRowCnt: {nRowCnt}");
-                        if (nRowCnt > 0)
+                        // 9:일자, 8:시간, 13:시가, 14:고가, 15:저가, 4:종가, 83:거래량
+                        // 메모리 블럭에서 데이터를 읽어온다.
+                        var commRecvData = api.GetCommFidDataBlock(); // 콜백함수에서만 사용가능
+                        chartDatas.Capacity = commRecvData.Rows;
+                        for (int i = 0; i < commRecvData.Rows; i++)
                         {
-                            var datas = api.ParseFidBlockArray(nRowCnt, e.pBlock);
-                            for (int i = 0; i < datas.Length; i++)
-                            {
-                                OutLog($"{i}: {datas[i][0]}, {datas[i][1]}, {datas[i][2]}");
-                            }
+                            chartDatas.Add((
+                                double.Parse(commRecvData[i, 0]) * 1000000
+                                + double.Parse(commRecvData[i, 1]), // T = 일자*1000000 + 시간
+                                double.Parse(commRecvData[i, 2]),   // O
+                                double.Parse(commRecvData[i, 3]),   // H
+                                double.Parse(commRecvData[i, 4]),   // L
+                                double.Parse(commRecvData[i, 5]),   // C
+                                double.Parse(commRecvData[i, 6])    // V
+                                ));
                         }
                     }
                     );
@@ -156,6 +163,12 @@ namespace WpfApp1
                 }
 
                 OutLog($"returned 차트요청: {nReturn}");
+                OutLog($"지수차트요청 [{code}]: 데이터개수: {chartDatas.Count}");
+
+                for (int i = 0; i < chartDatas.Count; i++)
+                {
+                    OutLog($"{i}: {chartDatas[i].T}, {chartDatas[i].O}, {chartDatas[i].H}, {chartDatas[i].L}, {chartDatas[i].C}, {chartDatas[i].V}");
+                }
             }
         }
     }

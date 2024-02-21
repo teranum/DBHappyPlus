@@ -1692,6 +1692,93 @@ namespace DBCommAgent.NET
             }
             return result;
         }
+
+        /// <summary>
+        /// FID조회 응답데이터 메모리 블럭 가져오기, 대량의 데이터 처리 시 GetFidOutputData 함수 호출보다 빠른 성능을 보인다.
+        /// <para>FID조회응답 이벤트(OnGetFidData) 안에서만 호출한다.</para>
+        /// <code>
+        /// // 국내지수 선물 15분 차트 데이터 가져오기 샘플
+        /// List&lt;(double T, double O, double H, double L, double C, double V)> chartDatas = [];
+        /// string code = "101V3000";
+        /// string date = DateTime.Today.ToString("yyyyMMdd");
+        /// int nReturn = await api.RequestFidArrayAsync(
+        ///     [
+        ///     ("9001", "F"),
+        ///     ("9002", code),
+        ///     ("9034", date),
+        ///     ("9035", date),
+        ///     ("9119", "900"), // 15분봉
+        ///     ("GID", "1005"),
+        ///     ], "9,8,13,14,15,4,83", "0", "", "9999", 100,
+        ///     (ov, e) =>
+        ///     {
+        ///         var commRecvData = api.GetCommFidDataBlock();
+        ///         chartDatas.Capacity = commRecvData.Rows;
+        ///         for (int i = 0; i &lt; commRecvData.Rows; i++)
+        ///         {
+        ///             chartDatas.Add((
+        ///                 double.Parse(commRecvData[i, 0]) * 1000000
+        ///                 + double.Parse(commRecvData[i, 1]), // T = 일자*1000000 + 시간
+        ///                 double.Parse(commRecvData[i, 2]),   // O
+        ///                 double.Parse(commRecvData[i, 3]),   // H
+        ///                 double.Parse(commRecvData[i, 4]),   // L
+        ///                 double.Parse(commRecvData[i, 5]),   // C
+        ///                 double.Parse(commRecvData[i, 6])    // V
+        ///                 ));
+        ///         }
+        ///     }
+        ///     );
+        /// if (nReturn &lt; 0)
+        /// {
+        ///     OutLog($"RequestFidArrayAsync failed({nReturn}): {api.GetLastErrMsg()}");
+        ///     return;
+        /// }
+        /// 
+        /// OutLog($"returned 차트요청: {nReturn}");
+        /// OutLog($"지수차트요청 [{code}]: 데이터개수: {chartDatas.Count}");
+        /// ...
+        /// </code>
+        /// </summary>
+        /// <returns>실패시 Rows값이 0</returns>
+        public virtual CommRecvData GetCommFidDataBlock()
+        {
+            nint ptr = 0;
+            try
+            {
+                ptr = Marshal.AllocCoTaskMem(Marshal.SizeOf<CommRecvData>());
+                if (GetCommFidDataBlock((long)ptr) != 1)
+                {
+                    return default;
+                }
+                return Marshal.PtrToStructure<CommRecvData>(ptr);
+            }
+            catch (Exception)
+            {
+                return default;
+            }
+            finally
+            {
+                Marshal.FreeCoTaskMem(ptr);
+            }
+        }
+
+        /// <summary>
+        /// 실시간 수신 데이터 메모리 블럭 가져오기, 대량의 데이터 처리 시 GetRealOutputData 함수 호출보다 빠른 성능을 보인다.
+        /// <para>실시간데이터 수신 이벤트(OnGetRealData) 안에서만 호출한다.</para>
+        /// </summary>
+        /// <returns>실패시 Rows값이 0</returns>
+        public virtual CommRecvData GetCommRealRecvDataBlock()
+        {
+            var ptr = Marshal.AllocCoTaskMem(Marshal.SizeOf<CommRecvData>());
+            if (GetCommRealRecvDataBlock((long)ptr) != 1)
+            {
+                return default;
+            }
+            var commRecvData = Marshal.PtrToStructure<CommRecvData>(ptr);
+            Marshal.FreeCoTaskMem(ptr);
+
+            return commRecvData;
+        }
         #endregion
     }
 
@@ -1827,4 +1914,57 @@ namespace DBCommAgent.NET
         /// </summary>
         PopUpMsg = 160,
     }
+
+    /// <summary>
+    /// 수신데이터를 직접 추출한다. (FID 또는 REAL 데이터 보관용)
+    /// 종목리스트, 차트 데이터 같은 대량의 데이터 처리 시
+    /// 에이전트 컨트롤의 GetFidOutputData 함수 호출보다 빠른 성능을 보인다.
+    /// 대량의 실시간 데이터 처리 시에는 에이전트 컨트롤 GetRealOutputData 함수 호출보다 빠른 성능을 보인다.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public readonly struct CommRecvData
+    {
+        private readonly nint native_vfTable;
+        private readonly IntPtr m_ptrBuf;
+
+        /// <summary>
+        /// 레코드 개수
+        /// </summary>
+        public readonly int Rows;
+
+        /// <summary>
+        /// 필드 개수
+        /// </summary>
+        public readonly int Cols;
+
+        /// <inheritdoc cref="Rows"/>
+        public readonly int GetRowCnt() => Rows;
+
+        /// <inheritdoc cref="Cols"/>
+        public readonly int GetColCnt() => Cols;
+
+        /// <summary>
+        /// 메모리 블럭에서 데이터 추출
+        /// </summary>
+        /// <param name="nRow">레코드 index</param>
+        /// <param name="nCol">필드 index</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public readonly string GetItem(int nRow, int nCol)
+        {
+            if (nRow < 0 || nRow >= Rows)
+                throw new ArgumentOutOfRangeException(nameof(nRow), "nRow is out of range");
+
+            if (nCol < 0 || nCol >= Cols)
+                throw new ArgumentOutOfRangeException(nameof(nCol), "nCol is out of range");
+
+            int nindex = (nRow * Cols) + nCol;
+            nint ptr = Marshal.PtrToStructure<nint>(m_ptrBuf + IntPtr.Size * nindex);
+            return Marshal.PtrToStringAnsi(ptr);
+        }
+
+        /// <inheritdoc cref="GetItem"/>
+        public readonly string this[int nRow, int nCol] => GetItem(nRow, nCol);
+    }
+
 }

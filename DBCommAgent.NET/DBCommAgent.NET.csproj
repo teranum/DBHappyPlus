@@ -5,7 +5,7 @@
 		<TargetFrameworks>netstandard2.0</TargetFrameworks>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<Description>Common wrapper for DBHappyPlus OpenApi</Description>
-		<Version>1.0.2</Version>
+		<Version>1.0.3</Version>
 		<Title>DBCommAgent.NET</Title>
 		<PackageTags>DB, DBOA, HappyPlus</PackageTags>
 		<Authors>teranum</Authors>

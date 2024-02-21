@@ -10,7 +10,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
-		<PackageReference Include="DBCommAgent.NET" Version="1.0.2" />
+		<PackageReference Include="DBCommAgent.NET" Version="1.0.3" />
 	</ItemGroup>
 
 </Project>
