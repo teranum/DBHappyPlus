@@ -10,6 +10,7 @@
 *.userosscache
 *.sln.docstates
 [Ss]ecret.*
+temp_*.cs
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
