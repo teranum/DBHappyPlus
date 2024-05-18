@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	  <Description>Wrapper for DB RestAPI version</Description>
+	  <Version>0.0.1-pre</Version>
+	  <Title>DBOpenApi.NET</Title>
+	  <PackageTags>DB, DBOA, HappyPlus</PackageTags>
+	  <Authors>teranum</Authors>
+	  <Copyright>Copyright © teranum 2024</Copyright>
+	  <RepositoryUrl>https://github.com/teranum/DBHappyPlus/tree/master/DBOpenApi.NET</RepositoryUrl>
+	  <RepositoryType>git</RepositoryType>
+	  <PackageProjectUrl>https://github.com/teranum/DBHappyPlus/tree/master/DBOpenApi.NET</PackageProjectUrl>
+	  <PackageIcon>icon.png</PackageIcon>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <Company>$(Authors)</Company>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+	  <None Include="icon.png">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
+	  </None>
+	  <None Include="README.md">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
+	  </None>
+  </ItemGroup>
+
+</Project>
