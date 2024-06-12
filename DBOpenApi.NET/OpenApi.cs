@@ -384,4 +384,73 @@ public class OpenApi
     public async Task<(string json_text, string cont_yn, string cont_key)?> RequestAsync(string path, IEnumerable<KeyValuePair<string, object?>> datas, string cont_yn = "N", string cont_key = "")
         => await RequestAsync(path, JsonSerializer.Serialize(datas, _jsonOptions), cont_yn, cont_key);
 
+    /// <summary>
+    /// TR 데이터를 요청한다
+    /// </summary>
+    /// <param name="tr_cd">TR코드</param>
+    /// <param name="datas">JSON 전문</param>
+    /// <param name="cont_yn">연속조회 여부</param>
+    /// <param name="cont_key">연속조회 키</param>
+    /// <returns>수신 데이터</returns>
+    public async Task<ResponseData?> RequestTrData(string tr_cd, IEnumerable<KeyValuePair<string, object?>> datas, string cont_yn = "N", string cont_key = "")
+    {
+        LastErrorMessage = string.Empty;
+
+        // tr_cd 로 Path를 가져온다
+        var trSpec = LibConst.GetTrSpec(tr_cd);
+        if (trSpec == null)
+        {
+            LastErrorMessage = "요청코드를 찾을 수 없습니다";
+            return null;
+        }
+
+        var response = await RequestAsync(trSpec.Path, datas, cont_yn, cont_key);
+        if (response is null)
+        {
+            LastErrorMessage = "수신데이터가 없습니다.";
+            return null;
+        }
+
+        try
+        {
+            var responseData = JsonSerializer.Deserialize<ResponseData>(response.Value.json_text, _jsonOptions);
+            if (responseData is not null)
+            {
+                responseData.cont_yn = response.Value.cont_yn;
+                responseData.cont_key = response.Value.cont_key;
+
+                return responseData;
+            }
+        }
+        catch (Exception ex)
+        {
+            LastErrorMessage = ex.Message;
+        }
+
+        return null;
+    }
+}
+
+/// <summary>
+/// 수신 데이터
+/// </summary>
+public class ResponseData
+{
+    /// <summary>연속조회 여부</summary>
+    public string cont_yn { get; set; } = string.Empty;
+    /// <summary>연속조회 키</summary>
+    public string cont_key { get; set; } = string.Empty;
+    /// <summary>응답코드</summary>
+    public string rsp_cd { get; set; } = string.Empty;
+    /// <summary>응답메시지</summary>
+    public string rsp_msg { get; set; } = string.Empty;
+
+    /// <summary>응답데이터1</summary>
+    public JsonElement? Out;
+    /// <summary>응답데이터2</summary>
+    public JsonElement? Out1;
+    /// <summary>응답데이터3</summary>
+    public JsonElement? Out2;
+    /// <summary>응답데이터4</summary>
+    public JsonElement? Out3;
 }
