@@ -99,7 +99,7 @@ public class OpenApi
     /// <param name="is_simulation">모의투자 인 경우 true로 설정</param>
     /// <param name="wss_domain">해외선물옵션인 경우 LibConst.WssUrlGlobal 로 설정</param>
     /// <returns>true: 연결성공, false: 연결실패</returns>
-    public async ValueTask<bool> Login(string appKey, string appSecretKey, string access_token = "", bool is_simulation = false, string wss_domain = "")
+    public async Task<bool> LoginAsync(string appKey, string appSecretKey, string access_token = "", bool is_simulation = false, string wss_domain = "")
     {
         if (Connected)
         {
@@ -190,7 +190,7 @@ public class OpenApi
     /// <param name="tr_cd">DB증권 거래코드</param>
     /// <param name="tr_key">단축코드 6자리 또는 8자리 (단건, 연속)</param>
     /// <returns>true: 요청성공, false: 요청실패</returns>
-    public Task<bool> AddRealtimeRequest(string tr_cd, string tr_key) => RealtimeRequest<WssRequest>(new(new(_authorization, "3"), new(tr_cd, tr_key)));
+    public Task<bool> AddRealtimeAsync(string tr_cd, string tr_key) => RealtimeRequestAsync<WssRequest>(new(new(_authorization, "3"), new(tr_cd, tr_key)));
 
     /// <summary>
     /// 실시간 시세해제
@@ -198,7 +198,7 @@ public class OpenApi
     /// <param name="tr_cd">DB증권 거래코드</param>
     /// <param name="tr_key">단축코드 6자리 또는 8자리 (단건, 연속)</param>
     /// <returns>true: 요청성공, false: 요청실패</returns>
-    public Task<bool> RemoveRealtimeRequest(string tr_cd, string tr_key) => RealtimeRequest<WssRequest>(new(new(_authorization, "4"), new(tr_cd, tr_key)));
+    public Task<bool> RemoveRealtimeAsync(string tr_cd, string tr_key) => RealtimeRequestAsync<WssRequest>(new(new(_authorization, "4"), new(tr_cd, tr_key)));
 
     private async Task WebsocketListen(ClientWebSocket webSocket)
     {
@@ -269,13 +269,7 @@ public class OpenApi
         }
     }
 
-    /// <summary>
-    /// 실시간 요청
-    /// </summary>
-    /// <typeparam name="T">request 타입</typeparam>
-    /// <param name="request">request</param>
-    /// <returns></returns>
-    protected async Task<bool> RealtimeRequest<T>(T request)
+    private async Task<bool> RealtimeRequestAsync<T>(T request)
     {
         if (!Connected || _wssClient is null || _wssClient.State != WebSocketState.Open)
         {
@@ -296,7 +290,7 @@ public class OpenApi
         }
     }
 
-    private async ValueTask<T?> PostUrlEncodedAsync<T>(string path, IEnumerable<KeyValuePair<string, string>> nameValueCollection)
+    private async Task<T?> PostUrlEncodedAsync<T>(string path, IEnumerable<KeyValuePair<string, string>> nameValueCollection)
     {
         LastErrorMessage = string.Empty;
         try
@@ -331,65 +325,6 @@ public class OpenApi
     }
 
     /// <summary>
-    /// 요청 전문을 보낸다<br/>
-    /// 
-    /// </summary>
-    /// <param name="tr_cd">tr_cd</param>
-    /// <param name="request"></param>
-    /// <param name="cont_yn">연속조회 여부: "Y" 또는 "N"</param>
-    /// <param name="cont_key">연속조회 키</param>
-    /// <param name="path">URL경로</param>
-    /// <returns>응답 데이터</returns>
-    public async Task<ResponseData?> RequestTrData(string tr_cd, IDictionary<string, object?> request, string cont_yn = "N", string cont_key = "", string path = "")
-    {
-        LastErrorMessage = string.Empty;
-
-        if (string.IsNullOrEmpty(path))
-        {
-            if (LibConst.Paths.TryGetValue(tr_cd, out LibConst.TrSpec? trSpec))
-                path = trSpec.Path;
-            else
-            {
-                LastErrorMessage = "요청코드 경로를 찾을 수 없습니다";
-                return null;
-            }
-        }
-
-        // 요청 전문을 만든다
-        string jsonbody = JsonSerializer.Serialize(request);
-        var content = new StringContent(jsonbody, Encoding.UTF8, "application/json");
-        HttpRequestMessage httpRequestMessage = new(HttpMethod.Post, path)
-        {
-            Content = content,
-        };
-
-        httpRequestMessage.Headers.Add("cont_yn", cont_yn);
-        httpRequestMessage.Headers.Add("cont_key", cont_key);
-
-        // 법인 경우 mac_address 필수
-        if (_macAddress.Length > 0) httpRequestMessage.Headers.Add("mac_address", _macAddress);
-
-        // 요청을 보낸다
-        try
-        {
-            var httpresponseMsg = await _httpClient.SendAsync(httpRequestMessage);
-            var jsonResponse = await httpresponseMsg.Content.ReadAsStringAsync();
-            var response = JsonSerializer.Deserialize<ResponseData>(jsonResponse, _jsonOptions);
-            if (response != null)
-            {
-                response.cont_yn = httpresponseMsg.Headers.GetValues("cont_yn").FirstOrDefault() ?? "N";
-                response.cont_key = httpresponseMsg.Headers.GetValues("cont_key").FirstOrDefault() ?? "";
-            }
-            return response;
-        }
-        catch (Exception ex)
-        {
-            LastErrorMessage = $"RequestTrData Error: {ex.Message}";
-            return null;
-        }
-    }
-
-    /// <summary>
     /// JSON 전문을 보낸다
     /// </summary>
     /// <param name="path">URL</param>
@@ -397,7 +332,7 @@ public class OpenApi
     /// <param name="cont_yn">연속조회 여부</param>
     /// <param name="cont_key">연속조회 키</param>
     /// <returns></returns>
-    public async Task<(string json_text, string cont_yn, string cont_key)?> RequestWithJson(string path, string jsonbody, string cont_yn = "N", string cont_key = "")
+    public async Task<(string json_text, string cont_yn, string cont_key)?> RequestAsync(string path, string jsonbody, string cont_yn = "N", string cont_key = "")
     {
         LastErrorMessage = string.Empty;
 
@@ -438,38 +373,15 @@ public class OpenApi
         }
     }
 
-
-}
-
-/// <summary>
-/// 응답 데이터
-/// </summary>
-public class ResponseData
-{
     /// <summary>
-    /// 연속조회 여부
+    /// Key/Value 전문을 보낸다
     /// </summary>
-    public string cont_yn = "N";
+    /// <param name="path">URL</param>
+    /// <param name="datas">JSON 전문</param>
+    /// <param name="cont_yn">연속조회 여부</param>
+    /// <param name="cont_key">연속조회 키</param>
+    /// <returns></returns>
+    public async Task<(string json_text, string cont_yn, string cont_key)?> RequestAsync(string path, IEnumerable<KeyValuePair<string, object?>> datas, string cont_yn = "N", string cont_key = "")
+        => await RequestAsync(path, JsonSerializer.Serialize(datas, _jsonOptions), cont_yn, cont_key);
 
-    /// <summary>연속조회 키</summary>
-    public string cont_key = string.Empty;
-
-    /// <summary>응답코드</summary>
-    public string rsp_cd { get; set; } = string.Empty;
-
-    /// <summary>응답메시지</summary>
-    public string rsp_msg { get; set; } = string.Empty;
-
-    /// <summary>응답데이터 Out</summary>
-    public object? Out { get; set; }
-    /// <summary>응답데이터 Out1</summary>
-    public object? Out1 { get; set; }
-    /// <summary>응답데이터 Out2</summary>
-    public object? Out2 { get; set; }
-    /// <summary>응답데이터 Out3</summary>
-    public object? Out3 { get; set; }
-    /// <summary>응답데이터 Out4</summary>
-    public object? Out4 { get; set; }
-    /// <summary>응답데이터 Out5</summary>
-    public object? Out5 { get; set; }
 }

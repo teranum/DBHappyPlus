@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	  <Description>Wrapper for DB RestAPI version</Description>
-	  <Version>0.0.1-pre</Version>
+	  <Version>0.0.2-pre</Version>
 	  <Title>DBOpenApi.NET</Title>
 	  <PackageTags>DB, DBOA, HappyPlus</PackageTags>
 	  <Authors>teranum</Authors>
