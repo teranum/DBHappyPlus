@@ -24,6 +24,7 @@ public class OpenApi
 
 
     private readonly HttpClient _httpClient;
+    private string _connected_wss_domain = string.Empty;
     private ClientWebSocket? _wssClient;
     private string _authorization = string.Empty;
     private string _macAddress = string.Empty;
@@ -96,10 +97,9 @@ public class OpenApi
     /// <param name="appKey">포탈에서 발급된 고객의 앱Key</param>
     /// <param name="appSecretKey">포탈에서 발급된 고객의 앱 비밀Key</param>
     /// <param name="access_token">이미 발급받은 액서스 키</param>
-    /// <param name="is_simulation">모의투자 인 경우 true로 설정</param>
     /// <param name="wss_domain">해외선물옵션인 경우 LibConst.WssUrlGlobal 로 설정</param>
     /// <returns>true: 연결성공, false: 연결실패</returns>
-    public async Task<bool> LoginAsync(string appKey, string appSecretKey, string access_token = "", bool is_simulation = false, string wss_domain = "")
+    public async Task<bool> ConnectAsync(string appKey, string appSecretKey, string access_token = "", string wss_domain = "")
     {
         if (Connected)
         {
@@ -119,10 +119,10 @@ public class OpenApi
             OAuth? oAuth = await PostUrlEncodedAsync<OAuth>("/oauth2/token",
                 [
                     new("grant_type", "client_credentials"),
-                        new("appkey", appKey),
-                        new("appsecretkey", appSecretKey),
-                        new("scope", "oob"),
-                    ]);
+                    new("appkey", appKey),
+                    new("appsecretkey", appSecretKey),
+                    new("scope", "oob"),
+                ]);
 
             if (oAuth == null)
             {
@@ -136,22 +136,19 @@ public class OpenApi
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(oAuth.token_type, _authorization);
         }
 
+        // 모의투자인지 실투자인지 구분한다
+        var response = await RequestAsync("/api/v1/trading/kr-stock/inquiry/rdterm-ernrate", """{"In":{"IsuNo":"","BnsDt":""}}""");
+        if (response is null)
+        {
+            // 요청 실패
+            LastErrorMessage = "더미 요청 실패";
+            return false;
+        }
 
-        ServerType = is_simulation ? SERVER_TYPE.모의투자 : SERVER_TYPE.실투자;
-        //// 모의투자인지 실투자인지 구분한다
-        //Dictionary<string, object?> CSPEQ00400 = new();
-        //var response = await RequestTrData("CSPEQ00400", CSPEQ00400);
-        //if (response is null)
-        //{
-        //    // 요청 실패
-        //    LastErrorMessage = "모의투자/실투자 구분 요청 실패";
-        //    return false;
-        //}
-
-        //if (response.rsp_msg.StartsWith("모의투자", StringComparison.Ordinal))
-        //{
-        //    ServerType = SERVER_TYPE.모의투자;
-        //}
+        if (response.Value.json_text.Contains("모의투자", StringComparison.Ordinal))
+        {
+            ServerType = SERVER_TYPE.모의투자;
+        }
 
         // 실시간 웹소켓 연결
         if (string.IsNullOrEmpty(wss_domain))
@@ -163,9 +160,12 @@ public class OpenApi
         _wssClient = new ClientWebSocket();
         if (_wssClient.ConnectAsync(wssUri, CancellationToken.None).Wait(2000))
         {
+            _connected_wss_domain = wss_domain;
             Connected = true;
             _ = WebsocketListen(_wssClient);
 
+            // 더미 웹소켓 요청
+            bool ret = await AddRealtimeAsync("9999", "9999");
             return true;
         }
 
@@ -174,12 +174,12 @@ public class OpenApi
     }
 
     /// <summary>연결 해제</summary>
-    public void Close()
+    public async Task CloseAsync()
     {
         if (Connected)
         {
             if (_wssClient is not null && _wssClient.State == WebSocketState.Open)
-                _wssClient.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None).Wait();
+                await _wssClient.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
             Connected = false;
         }
     }
@@ -190,7 +190,7 @@ public class OpenApi
     /// <param name="tr_cd">DB증권 거래코드</param>
     /// <param name="tr_key">단축코드 6자리 또는 8자리 (단건, 연속)</param>
     /// <returns>true: 요청성공, false: 요청실패</returns>
-    public Task<bool> AddRealtimeAsync(string tr_cd, string tr_key) => RealtimeRequestAsync<WssRequest>(new(new(_authorization, "3"), new(tr_cd, tr_key)));
+    public Task<bool> AddRealtimeAsync(string tr_cd, string tr_key) => RealtimeRequestAsync<WssRequest>(new(new(_authorization, LibConst.AccountRealTimes.Contains(tr_cd) ? "3" : "1"), new(tr_cd, tr_key)));
 
     /// <summary>
     /// 실시간 시세해제
@@ -198,7 +198,7 @@ public class OpenApi
     /// <param name="tr_cd">DB증권 거래코드</param>
     /// <param name="tr_key">단축코드 6자리 또는 8자리 (단건, 연속)</param>
     /// <returns>true: 요청성공, false: 요청실패</returns>
-    public Task<bool> RemoveRealtimeAsync(string tr_cd, string tr_key) => RealtimeRequestAsync<WssRequest>(new(new(_authorization, "4"), new(tr_cd, tr_key)));
+    public Task<bool> RemoveRealtimeAsync(string tr_cd, string tr_key) => RealtimeRequestAsync<WssRequest>(new(new(_authorization, LibConst.AccountRealTimes.Contains(tr_cd) ? "4" : "2"), new(tr_cd, tr_key)));
 
     private async Task WebsocketListen(ClientWebSocket webSocket)
     {
@@ -213,12 +213,7 @@ public class OpenApi
 
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
-                    if (webSocket.State != WebSocketState.Closed)
-                    {
-                        await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
-                        if (_wssClient == webSocket) _wssClient = null;
-                    }
-                    OnWssClosed("Websocket: " + result.CloseStatusDescription ?? "Closed");
+                    OnWssClosed($"Websocket: Closed.({result.CloseStatusDescription ?? string.Empty})");
                     return;
                 }
 
@@ -251,6 +246,12 @@ public class OpenApi
             RealtimeResponseModel? response = JsonSerializer.Deserialize<RealtimeResponseModel>(stringData);
             if (response != null && response.header != null)
             {
+                if (response.header.tr_cd.Equals("9999"))
+                {
+                    // 더미 응답
+                    OnMessageEvent?.Invoke(this, new($"Websocket: Connected.({_connected_wss_domain})"));
+                    return;
+                }
                 if (!string.IsNullOrEmpty(response.header.rsp_msg))
                 {
                     OnMessageEvent?.Invoke(this, new($"{response.header.tr_cd}({response.header.tr_type}) : {response.header.rsp_msg}"));
@@ -404,20 +405,22 @@ public class OpenApi
             return null;
         }
 
-        var response = await RequestAsync(trSpec.Path, datas, cont_yn, cont_key);
-        if (response is null)
+        var response_b = await RequestAsync(trSpec.Path, datas, cont_yn, cont_key);
+        if (response_b is null)
         {
             LastErrorMessage = "수신데이터가 없습니다.";
             return null;
         }
 
+        var response = response_b.Value;
+
         try
         {
-            var responseData = JsonSerializer.Deserialize<ResponseData>(response.Value.json_text, _jsonOptions);
+            var responseData = JsonSerializer.Deserialize<ResponseData>(response.json_text, _jsonOptions);
             if (responseData is not null)
             {
-                responseData.cont_yn = response.Value.cont_yn;
-                responseData.cont_key = response.Value.cont_key;
+                responseData.cont_yn = response.cont_yn;
+                responseData.cont_key = response.cont_key;
 
                 return responseData;
             }
