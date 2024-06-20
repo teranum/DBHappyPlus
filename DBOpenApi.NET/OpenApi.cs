@@ -2,7 +2,6 @@
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
 namespace DBOpenApi.NET;
@@ -69,7 +68,7 @@ public class OpenApi
     /// <summary>
     /// 로그인 된 경우 액세스 토큰
     /// </summary>
-    public string access_token => _authorization;
+    public string AccessToken => _authorization;
 
     /// <summary>
     /// 마지막 에러 메시지
@@ -381,7 +380,7 @@ public class OpenApi
     /// Key/Value 전문을 보낸다
     /// </summary>
     /// <param name="path">URL</param>
-    /// <param name="datas">JSON 전문</param>
+    /// <param name="datas">JSON 요청데이터</param>
     /// <param name="cont_yn">연속조회 여부</param>
     /// <param name="cont_key">연속조회 키</param>
     /// <returns></returns>
@@ -419,7 +418,7 @@ public class OpenApi
 
         try
         {
-            var responseData = JsonSerializer.Deserialize<ResponseData>(response.json_text, _jsonOptions);
+            var responseData = JsonSerializer.Deserialize<ResponseData>(response.json_text);
             if (responseData is not null)
             {
                 responseData.cont_yn = response.cont_yn;
