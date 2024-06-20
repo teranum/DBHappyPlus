@@ -2,6 +2,7 @@
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
 namespace DBOpenApi.NET;
@@ -299,11 +300,13 @@ public class OpenApi
             var response = await _httpClient.PostAsync(path, new FormUrlEncodedContent(nameValueCollection)).ConfigureAwait(false);
             if (response != null)
             {
+                var bytes = await response.Content.ReadAsByteArrayAsync();
+                var json_text = Encoding.UTF8.GetString(bytes);
                 if (response.IsSuccessStatusCode)
                 {
-                    return JsonSerializer.Deserialize<T>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
+                    return JsonSerializer.Deserialize<T>(json_text);
                 }
-                LastErrorMessage = await response.Content.ReadAsStringAsync().ConfigureAwait(false) ?? response.StatusCode.ToString();
+                LastErrorMessage = json_text ?? response.StatusCode.ToString();
             }
         }
         catch (Exception ex)
