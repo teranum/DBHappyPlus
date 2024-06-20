@@ -5,7 +5,7 @@
 		<TargetFrameworks>netstandard2.0</TargetFrameworks>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<Description>Common wrapper for DBHappyPlus OpenApi</Description>
-		<Version>1.0.3</Version>
+		<Version>1.0.4</Version>
 		<Title>DBCommAgent.NET</Title>
 		<PackageTags>DB, DBOA, HappyPlus</PackageTags>
 		<Authors>teranum</Authors>
@@ -29,6 +29,10 @@
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
 		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
 	</ItemGroup>
 
 </Project>

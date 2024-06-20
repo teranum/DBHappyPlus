@@ -624,7 +624,7 @@ namespace DBCommAgent.NET
         /// </summary>
         /// <param name="nRqId">조회고유ID(Request ID)</param>
         /// <param name="strTrCode">서비스Tr코드(Tran 리소스파일(*.res)파일의 ' TR_CODE=' 항목)</param>
-        /// <param name="strRecName">Input레코드명(Tran 리소스파일(*.res)파일의 ' REC_NAME=' 항목)</param>
+        /// <param name="strRecName">Input레코드명(Tran 리소스파일(*.res)파일의 ' RecName=' 항목)</param>
         /// <param name="strItem">Input항목명(Tran 리소스파일(*.res)파일의 'ITEM=' 항목)</param>
         /// <param name="strValue">Input항목에 대응하는 입력값</param>
         /// <returns>0 : 실패, 1 : 성공</returns>
@@ -668,7 +668,7 @@ namespace DBCommAgent.NET
         /// <para>Tran조회응답 이벤트(OnGetTranData) 안에서만 호출한다.</para>
         /// </summary>
         /// <param name="strTrCode">서비스 Tr코드(Tran 리소스파일(*.res)파일의 ' TR_CODE=' 항목)</param>
-        /// <param name="strRecName">Input 레코드명(Tran 리소스파일(*.res)파일의 ' REC_NAME=' 항목)</param>
+        /// <param name="strRecName">Input 레코드명(Tran 리소스파일(*.res)파일의 ' RecName=' 항목)</param>
         /// <returns>0 : 데이터 없음, 0보다 큰 정수 : 데이터 건수</returns>
         /// <exception cref="InvalidActiveXStateException"></exception>
         public virtual int GetTranOutputRowCnt(string strTrCode, string strRecName)
@@ -1504,6 +1504,63 @@ namespace DBCommAgent.NET
         }
 
         /// <summary>
+        /// RequestTran 비동기 확장함수
+        /// </summary>
+        /// <param name="InBlockName"></param>
+        /// <param name="KeyValues"></param>
+        /// <param name="sTrCode"></param>
+        /// <param name="sIsBenefit"></param>
+        /// <param name="sPrevOrNext"></param>
+        /// <param name="sPrevNextKey"></param>
+        /// <param name="sScreenNo"></param>
+        /// <param name="sTranType"></param>
+        /// <param name="nRequestCount"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public virtual async Task<int> RequestTranAsync(string InBlockName, IEnumerable<KeyValuePair<string, object>> KeyValues, string sTrCode, string sIsBenefit,
+            string sPrevOrNext, string sPrevNextKey, string sScreenNo, string sTranType, int nRequestCount,
+            Action<CommRecvOptionValue, _DDBCommAgentEvents_OnGetTranDataEvent> action
+            )
+        {
+            int nRequstId = CreateRequestID();
+            if (nRequstId < 0)
+            {
+                return nRequstId;
+            }
+            foreach (var keyValue in KeyValues)
+            {
+                SetTranInputData(nRequstId, sTrCode, InBlockName, keyValue.Key, keyValue.Value.ToString());
+            }
+            var newAsync = new AsyncNode([nRequstId])
+            {
+                _async_tran_data_action = action,
+            };
+            _async_list.Add(newAsync);
+
+            int nRet = RequestTran(nRequstId, sTrCode, sIsBenefit, sPrevOrNext, sPrevNextKey, sScreenNo, sTranType, nRequestCount);
+            if (nRet > 0)
+            {
+                bool bTimeOut = false;
+                Task taskAsync = Task.Run(() =>
+                {
+                    if (!newAsync._async_wait.WaitOne(AsyncTimeOut))
+                    {
+                        bTimeOut = true;
+                    }
+                });
+                await taskAsync.ConfigureAwait(true);
+                if (bTimeOut && _async_list.IndexOf(newAsync) >= 0)
+                {
+                    nRet = -902;
+                }
+            }
+            _async_list.Remove(newAsync);
+            return nRet;
+        }
+
+
+
+        /// <summary>
         /// RequestFid 비동기 확장함수
         /// <code>
         /// // 지수선물리스트 조회
@@ -1545,6 +1602,56 @@ namespace DBCommAgent.NET
             {
                 SetFidInputData(nRequstId, Key, Value);
             }
+            var newAsync = new AsyncNode([nRequstId])
+            {
+                _async_fid_data_action = action,
+            };
+            _async_list.Add(newAsync);
+
+            int nRet = RequestFid(nRequstId, strOutputFidList, strScreenNo);
+            if (nRet > 0)
+            {
+                bool bTimeOut = false;
+                Task taskAsync = Task.Run(() =>
+                {
+                    if (!newAsync._async_wait.WaitOne(AsyncTimeOut))
+                    {
+                        bTimeOut = true;
+                    }
+                });
+                await taskAsync.ConfigureAwait(true);
+                if (bTimeOut && _async_list.IndexOf(newAsync) >= 0)
+                {
+                    nRet = -902;
+                }
+            }
+            _async_list.Remove(newAsync);
+            return nRet;
+        }
+
+        /// <summary>
+        /// RequestFid 비동기 확장함수
+        /// </summary>
+        /// <param name="KeyValues"></param>
+        /// <param name="strGID"></param>
+        /// <param name="strOutputFidList"></param>
+        /// <param name="strScreenNo"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public virtual async Task<int> RequestFidAsync(IEnumerable<KeyValuePair<string, object>> KeyValues, string strGID, string strOutputFidList, string strScreenNo,
+            Action<CommRecvOptionValue, _DDBCommAgentEvents_OnGetFidDataEvent> action
+            )
+        {
+            int nRequstId = CreateRequestID();
+            if (nRequstId < 0)
+            {
+                return nRequstId;
+            }
+            foreach (var keyValue in KeyValues)
+            {
+                SetFidInputData(nRequstId, keyValue.Key, keyValue.Value.ToString());
+            }
+            if (strGID.Length > 0) SetFidInputData(nRequstId, "GID", strGID);
             var newAsync = new AsyncNode([nRequstId])
             {
                 _async_fid_data_action = action,
@@ -1645,6 +1752,112 @@ namespace DBCommAgent.NET
         }
 
         /// <summary>
+        /// RequestFidArray 비동기 확장함수
+        /// </summary>
+        /// <param name="KeyValues"></param>
+        /// <param name="strGID"></param>
+        /// <param name="strOutputFidList"></param>
+        /// <param name="strPreNext"></param>
+        /// <param name="strPreNextContext"></param>
+        /// <param name="strScreenNo"></param>
+        /// <param name="nRequestCount"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public virtual async Task<int> RequestFidArrayAsync(IEnumerable<KeyValuePair<string, object>> KeyValues, string strGID, string strOutputFidList, string strPreNext, string strPreNextContext, string strScreenNo, int nRequestCount,
+            Action<CommRecvOptionValue, _DDBCommAgentEvents_OnGetFidDataEvent> action
+            )
+        {
+            int nRequstId = CreateRequestID();
+            if (nRequstId < 0)
+            {
+                return nRequstId;
+            }
+            foreach (var keyValue in KeyValues)
+            {
+                SetFidInputData(nRequstId, keyValue.Key, keyValue.Value.ToString());
+
+            }
+            if (strGID.Length > 0)
+                SetFidInputData(nRequstId, "GID", strGID);
+            var newAsync = new AsyncNode([nRequstId])
+            {
+                _async_fid_data_action = action,
+            };
+            _async_list.Add(newAsync);
+
+            int nRet = RequestFidArray(nRequstId, strOutputFidList, strPreNext, strPreNextContext, strScreenNo, nRequestCount);
+            if (nRet > 0)
+            {
+                bool bTimeOut = false;
+                Task taskAsync = Task.Run(() =>
+                {
+                    if (!newAsync._async_wait.WaitOne(AsyncTimeOut))
+                    {
+                        bTimeOut = true;
+                    }
+                });
+                await taskAsync.ConfigureAwait(true);
+                if (bTimeOut && _async_list.IndexOf(newAsync) >= 0)
+                {
+                    nRet = -902;
+                }
+            }
+            _async_list.Remove(newAsync);
+            return nRet;
+        }
+
+        /// <summary>
+        /// RequestPortfolio 비동기 확장함수
+        /// </summary>
+        /// <param name="SymbolMarkets"></param>
+        /// <param name="strOutputFidList"></param>
+        /// <param name="strScreenNo"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public virtual async Task<int> RequestPortfolioAsync(IEnumerable<KeyValuePair<string, string>> SymbolMarkets, string strOutputFidList, string strScreenNo,
+            Action<CommRecvOptionValue, _DDBCommAgentEvents_OnGetFidDataEvent> action
+            )
+        {
+            int nRequstId = CreateRequestID();
+            if (nRequstId < 0)
+            {
+                return nRequstId;
+            }
+            int nRequestCount = 0;
+            foreach (var symbol_market in SymbolMarkets)
+            {
+                nRequestCount++;
+                SetPortfolioFidInputData(nRequstId, symbol_market.Key, symbol_market.Value);
+            }
+            SetFidInputData(nRequstId, "GID", "5000");
+            var newAsync = new AsyncNode([nRequstId])
+            {
+                _async_fid_data_action = action,
+            };
+            _async_list.Add(newAsync);
+
+            int nRet = RequestFidArray(nRequstId, strOutputFidList, "0", "", strScreenNo, nRequestCount);
+            if (nRet > 0)
+            {
+                bool bTimeOut = false;
+                Task taskAsync = Task.Run(() =>
+                {
+                    if (!newAsync._async_wait.WaitOne(AsyncTimeOut))
+                    {
+                        bTimeOut = true;
+                    }
+                });
+                await taskAsync.ConfigureAwait(true);
+                if (bTimeOut && _async_list.IndexOf(newAsync) >= 0)
+                {
+                    nRet = -902;
+                }
+            }
+            _async_list.Remove(newAsync);
+            return nRet;
+        }
+
+        /// <summary>
         /// 조회응답 부가정보/옵션값 전체 반환
         /// <para>Tran/FID조회(OnGetTranData, OnGetFidData) 응답 이벤트 안에서만 호출한다.</para>
         /// </summary>
@@ -1666,7 +1879,12 @@ namespace DBCommAgent.NET
 
         /// <summary>
         /// 이벤트 pBlock 데이터 파싱
-        /// <para>TFID조회(OnGetFidData) 응답 이벤트 안에서만 호출한다.</para>
+        /// <code>
+        /// int nRowCnt = api.GetFidOutputRowCnt(e.nRequestId);
+        /// string[][] datas = api.ParseFidBlockArray(nRowCnt, e.pBlock);
+        /// ...
+        /// </code>
+        /// <para>FID조회(OnGetFidData) 응답 이벤트 안에서만 호출한다.</para>
         /// </summary>
         /// <param name="nRowCnt">Row 개수</param>
         /// <param name="pBlock">e.pBlock</param>
@@ -1679,9 +1897,9 @@ namespace DBCommAgent.NET
                 throw new ArgumentOutOfRangeException(nameof(nRowCnt), "nRowCnt must be greater than 0");
             }
             // Splite in Record Separator(0x1E), Group Separator(0x1D), Unit Separator(0x1F)
-            string[] blockData = pBlock.Split(['\u001E', '\u001D', '\u001F',]);
+            var blockData = pBlock.Split(['\u001E', '\u001D', '\u001F',]);
             int fieldCount = blockData.Length / nRowCnt;
-            string[][] result = new string[nRowCnt][];
+            var result = new string[nRowCnt][];
             for (int i = 0; i < nRowCnt; i++)
             {
                 result[i] = new string[fieldCount];

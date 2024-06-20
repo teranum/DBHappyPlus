@@ -2,13 +2,16 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net8.0-windows</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<UseWindowsForms>true</UseWindowsForms>
 		<Nullable>enable</Nullable>
+		<PlatformTargets>x86;x64</PlatformTargets>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DBCommAgent.NET" Version="1.0.3" />
+		<PackageReference Include="ConsoleTables" Version="2.6.1" />
+		<ProjectReference Include="..\..\DBCommAgent.NET\DBCommAgent.NET.csproj" />
 	</ItemGroup>
 
 </Project>
