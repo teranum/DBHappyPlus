@@ -24,7 +24,6 @@ public class OpenApi
 
 
     private readonly HttpClient _httpClient;
-    private string _connected_wss_domain = string.Empty;
     private ClientWebSocket? _wssClient;
     private string _authorization = string.Empty;
     private string _macAddress = string.Empty;
@@ -157,19 +156,27 @@ public class OpenApi
         }
         Uri wssUri = new(wss_domain + "/websocket");
 
-        _wssClient = new ClientWebSocket();
-        if (_wssClient.ConnectAsync(wssUri, CancellationToken.None).Wait(2000))
+        try
         {
-            _connected_wss_domain = wss_domain;
-            Connected = true;
-            _ = WebsocketListen(_wssClient);
+            _wssClient = new ClientWebSocket();
+            if (_wssClient.ConnectAsync(wssUri, CancellationToken.None).Wait(2000))
+            {
+                Connected = true;
+                _ = WebsocketListen(_wssClient);
+                OnMessageEvent?.Invoke(this, new($"Websocket: Connected.({wssUri})"));
 
-            // 더미 웹소켓 요청
-            bool ret = await AddRealtimeAsync("9999", "9999");
-            return true;
+                // 더미 웹소켓 요청
+                _ = await AddRealtimeAsync("9999", "9999");
+                return true;
+            }
+        }
+        catch (Exception)
+        {
+            _wssClient = null;
+            LastErrorMessage = "Websocket서버 연결 응답 없습니다";
+            return false;
         }
 
-        LastErrorMessage = "Websocket서버 연결 응답 없습니다";
         return false;
     }
 
@@ -249,7 +256,6 @@ public class OpenApi
                 if (response.header.tr_cd.Equals("9999"))
                 {
                     // 더미 응답
-                    OnMessageEvent?.Invoke(this, new($"Websocket: Connected.({_connected_wss_domain})"));
                     return;
                 }
                 if (!string.IsNullOrEmpty(response.header.rsp_msg))
