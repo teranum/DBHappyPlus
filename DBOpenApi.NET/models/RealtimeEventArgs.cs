@@ -7,7 +7,7 @@ namespace DBOpenApi.NET;
 /// </summary>
 /// <param name="TrCode">Tr코드</param>
 /// <param name="Key">키</param>
-/// <param name="RealtimeBody">실시간응잡(JsonElement)</param>
+/// <param name="RealtimeBody">실시간응답(JsonElement)</param>
 public class RealtimeEventArgs(string TrCode, string Key, JsonElement RealtimeBody) : EventArgs
 {
     /// <summary>Tr코드</summary>

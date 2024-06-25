@@ -608,7 +608,7 @@ namespace DBCommAgent.NET
             return outRecData;
         }
 
-        public string[] 시장분류코드 { get; } = 
+        public string[] 시장분류코드 { get; } =
             [
             "J", "U", "W", "F",
             "O", "JF", "JO", "CM",
