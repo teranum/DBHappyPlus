@@ -246,11 +246,6 @@ public class OpenApi : IOpenApi
 
     record OAuth(string access_token, string scope, string token_type, long expires_in);
 
-    record WssRequest(WssRequest.Header header, WssRequest.Body body)
-    {
-        public record Header(string token, string tr_type);
-        public record Body(string tr_cd, string tr_key);
-    }
     record RealtimeResponseModel(RealtimeResponseModel.Header header, object body)
     {
         public record Header(string tr_type, string rsp_cd, string rsp_msg, string tr_cd, string tr_key);
