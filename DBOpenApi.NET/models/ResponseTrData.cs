@@ -7,8 +7,6 @@ public class ResponseTrData
 {
     /// <summary>TR코드</summary>
     public string tr_cd { get; set; } = string.Empty;
-    /// <summary>연속조회 여부</summary>
-    public bool cont_yn { get; set; }
     /// <summary>연속조회 키</summary>
     public string cont_key { get; set; } = string.Empty;
     /// <summary>응답코드</summary>

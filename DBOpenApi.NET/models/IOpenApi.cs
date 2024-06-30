@@ -52,38 +52,29 @@ public interface IOpenApi
     string LastErrorMessage { get; }
 
     /// <summary>
-    /// 실시간 시세등록
+    /// 실시간 시세 등록/해제
     /// </summary>
     /// <param name="tr_cd">증권 거래코드</param>
     /// <param name="tr_key">단축코드 6자리 또는 8자리 (단건, 연속)</param>
+    /// <param name="bAdd">시세등록: true, 시세해제: false</param>
     /// <returns>true: 요청성공, false: 요청실패</returns>
-    Task<bool> AddRealtimeAsync(string tr_cd, string tr_key);
+    Task<bool> RequestRealtimeAsync(string tr_cd, string tr_key, bool bAdd);
 
     /// <summary>
-    /// 실시간 시세해제
-    /// </summary>
-    /// <param name="tr_cd">증권 거래코드</param>
-    /// <param name="tr_key">단축코드 6자리 또는 8자리 (단건, 연속)</param>
-    /// <returns>true: 요청성공, false: 요청실패</returns>
-    Task<bool> RemoveRealtimeAsync(string tr_cd, string tr_key);
-
-    /// <summary>
-    /// 비동기 JSON 요청
+    /// 비동기 TR 요청
     /// </summary>
     /// <param name="tr_cd">증권 거래코드</param>
     /// <param name="jsonRequest">요청 전문</param>
-    /// <param name="cont_yn">연속거래 여부(True:연속○, False:연속×)</param>
     /// <param name="cont_key">연속일 경우 그전에 내려온 연속키 값 올림</param>
     /// <returns></returns>
-    Task<T?> RequestTrAsync<T>(string tr_cd, string jsonRequest, bool cont_yn = false, string cont_key = "") where T : ResponseTrData;
+    Task<T?> RequestTrAsync<T>(string tr_cd, string jsonRequest, string cont_key = "") where T : ResponseTrData;
 
     /// <summary>
     /// 비동기 JSON 요청
     /// </summary>
     /// <param name="path">URL경로</param>
     /// <param name="jsonRequest">요청 전문</param>
-    /// <param name="cont_yn">연속거래 여부(True:연속○, False:연속×)</param>
     /// <param name="cont_key">연속일 경우 그전에 내려온 연속키 값 올림</param>
     /// <returns></returns>
-    Task<(string jsonResponse, bool cont_yn, string cont_key)> RequestAsync(string path, string jsonRequest, bool cont_yn = false, string cont_key = "");
+    Task<(string jsonResponse, string cont_key)> RequestAsync(string path, string jsonRequest, string cont_key = "");
 }

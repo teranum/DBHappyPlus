@@ -126,7 +126,7 @@ public class OpenApi : IOpenApi
                 OnMessageEvent?.Invoke(this, new($"Websocket: Connected.({wssUri})"));
 
                 // 더미 웹소켓 요청
-                _ = await AddRealtimeAsync("9999", "9999");
+                _ = await RequestRealtimeAsync("9999", "9999", true);
                 return true;
             }
         }
@@ -150,14 +150,6 @@ public class OpenApi : IOpenApi
             IsConnected = false;
         }
     }
-
-    /// <inheritdoc cref="IOpenApi.AddRealtimeAsync"/>/>
-    public Task<bool> AddRealtimeAsync(string tr_cd, string tr_key)
-        => RealtimeRequestAsync<WssRequest>(new(new(_authorization, LibConst.AccountRealTimes.Contains(tr_cd) ? "3" : "1"), new(tr_cd, tr_key)));
-
-    /// <inheritdoc cref="IOpenApi.RemoveRealtimeAsync"/>/>
-    public Task<bool> RemoveRealtimeAsync(string tr_cd, string tr_key)
-        => RealtimeRequestAsync<WssRequest>(new(new(_authorization, LibConst.AccountRealTimes.Contains(tr_cd) ? "4" : "2"), new(tr_cd, tr_key)));
 
     private async Task WebsocketListen(ClientWebSocket webSocket)
     {
@@ -228,27 +220,6 @@ public class OpenApi : IOpenApi
         }
     }
 
-    private async Task<bool> RealtimeRequestAsync<T>(T request)
-    {
-        if (!IsConnected || _wssClient is null || _wssClient.State != WebSocketState.Open)
-        {
-            LastErrorMessage = "Websocket 연결이 되어 있지 않습니다";
-            return false;
-        }
-        LastErrorMessage = string.Empty;
-        try
-        {
-            string jsonbody = JsonSerializer.Serialize(request);
-            await _wssClient.SendAsync(Encoding.UTF8.GetBytes(jsonbody), WebSocketMessageType.Text, true, CancellationToken.None);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            LastErrorMessage = ex.Message;
-            return false;
-        }
-    }
-
     private async Task<T?> PostUrlEncodedAsync<T>(string path, IEnumerable<KeyValuePair<string, string>> nameValueCollection)
     {
         LastErrorMessage = string.Empty;
@@ -285,8 +256,33 @@ public class OpenApi : IOpenApi
         public record Header(string tr_type, string rsp_cd, string rsp_msg, string tr_cd, string tr_key);
     }
 
+    /// <inheritdoc cref="IOpenApi.RequestRealtimeAsync"/>/>
+    public async Task<bool> RequestRealtimeAsync(string tr_cd, string tr_key, bool bAdd)
+    {
+        if (!IsConnected || _wssClient is null || _wssClient.State != WebSocketState.Open)
+        {
+            LastErrorMessage = "Websocket 연결이 되어 있지 않습니다";
+            return false;
+        }
+        LastErrorMessage = string.Empty;
+
+        bool isAccount = LibConst.AccountRealTimes.Contains(tr_cd);
+
+        string jsonbody = $"{{\"header\":{{\"token\":\"{_authorization}\",\"tr_type\":\"{(bAdd ? (isAccount ? "3" : "1") : (isAccount ? "4" : "2"))}\"}},\"body\":{{\"tr_cd\":\"{tr_cd}\",\"tr_key\":\"{tr_key}\"}}}}";
+        try
+        {
+            await _wssClient.SendAsync(Encoding.UTF8.GetBytes(jsonbody), WebSocketMessageType.Text, true, CancellationToken.None);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            LastErrorMessage = ex.Message;
+            return false;
+        }
+    }
+
     /// <inheritdoc cref="IOpenApi.RequestAsync"/>
-    public async Task<(string jsonResponse, bool cont_yn, string cont_key)> RequestAsync(string path, string jsonRequest, bool cont_yn = false, string cont_key = "")
+    public async Task<(string jsonResponse, string cont_key)> RequestAsync(string path, string jsonRequest, string cont_key = "")
     {
         LastErrorMessage = string.Empty;
 
@@ -297,7 +293,7 @@ public class OpenApi : IOpenApi
             Content = content,
         };
 
-        httpRequestMessage.Headers.Add("cont_yn", cont_yn ? "Y" : "N");
+        httpRequestMessage.Headers.Add("cont_yn", cont_key.Length > 0 ? "Y" : "N");
         httpRequestMessage.Headers.Add("cont_key", cont_key);
 
         // 법인 경우 mac_address 필수
@@ -313,22 +309,25 @@ public class OpenApi : IOpenApi
             if (httpresponseMsg.Headers.TryGetValues("cont_yn", out var values))
             {
                 res_cont_yn = values.FirstOrDefault() ?? "";
+                if (res_cont_yn.Equals("Y"))
+                {
+                    if (httpresponseMsg.Headers.TryGetValues("cont_key", out values))
+                    {
+                        res_cont_key = values.FirstOrDefault() ?? "";
+                    }
+                }
             }
-            if (httpresponseMsg.Headers.TryGetValues("cont_key", out values))
-            {
-                res_cont_key = values.FirstOrDefault() ?? "";
-            }
-            return (jsonResponse, res_cont_yn.Equals("Y"), res_cont_key);
+            return (jsonResponse, res_cont_key);
         }
         catch (Exception ex)
         {
             LastErrorMessage = $"RequestTrData Error: {ex.Message}";
-            return (string.Empty, false, string.Empty);
+            return (string.Empty, string.Empty);
         }
     }
 
     /// <inheritdoc cref="IOpenApi.RequestTrAsync"/>
-    public async Task<T?> RequestTrAsync<T>(string tr_cd, string jsonRequest, bool cont_yn = false, string cont_key = "") where T : ResponseTrData
+    public async Task<T?> RequestTrAsync<T>(string tr_cd, string jsonRequest, string cont_key = "") where T : ResponseTrData
     {
         var trSpec = LibConst.GetTrSpec(tr_cd);
         if (trSpec == null)
@@ -337,7 +336,7 @@ public class OpenApi : IOpenApi
             return default;
         }
 
-        var response = await RequestAsync(trSpec.Path, jsonRequest, cont_yn, cont_key);
+        var response = await RequestAsync(trSpec.Path, jsonRequest, cont_key);
 
         if (response.jsonResponse.Length == 0)
         {
@@ -351,7 +350,6 @@ public class OpenApi : IOpenApi
             if (dataResponse is not null)
             {
                 dataResponse.tr_cd = tr_cd;
-                dataResponse.cont_yn = response.cont_yn;
                 dataResponse.cont_key = response.cont_key;
                 return dataResponse;
             }
