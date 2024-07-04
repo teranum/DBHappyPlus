@@ -12,7 +12,7 @@ public interface IOpenApi
     event EventHandler<RealtimeEventArgs>? OnRealtimeEvent;
 
     /// <summary>연결 여부</summary>
-    bool IsConnected { get; }
+    bool Connected { get; }
 
     /// <summary>모의투자 여부</summary>
     bool IsSimulation { get; }
@@ -61,15 +61,6 @@ public interface IOpenApi
     Task<bool> RequestRealtimeAsync(string tr_cd, string tr_key, bool bAdd);
 
     /// <summary>
-    /// 비동기 TR 요청
-    /// </summary>
-    /// <param name="tr_cd">증권 거래코드</param>
-    /// <param name="jsonRequest">요청 전문</param>
-    /// <param name="cont_key">연속일 경우 그전에 내려온 연속키 값 올림</param>
-    /// <returns></returns>
-    Task<T?> RequestTrAsync<T>(string tr_cd, string jsonRequest, string cont_key = "") where T : ResponseTrData;
-
-    /// <summary>
     /// 비동기 JSON 요청
     /// </summary>
     /// <param name="path">URL경로</param>
@@ -77,4 +68,13 @@ public interface IOpenApi
     /// <param name="cont_key">연속일 경우 그전에 내려온 연속키 값 올림</param>
     /// <returns></returns>
     Task<(string jsonResponse, string cont_key)> RequestAsync(string path, string jsonRequest, string cont_key = "");
+
+    /// <summary>
+    /// 비동기 TR 요청
+    /// </summary>
+    /// <param name="tr_cd">증권 거래코드</param>
+    /// <param name="indatas">요청 데이터</param>
+    /// <param name="cont_key">연속일 경우 그전에 내려온 연속키 값 올림</param>
+    /// <returns></returns>
+    Task<ResponseTrData?> RequestTrAsync(string tr_cd, IEnumerable<KeyValuePair<string, object?>> indatas, string cont_key = "");
 }

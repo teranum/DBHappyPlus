@@ -41,8 +41,8 @@ public class OpenApi : IOpenApi
     /// <inheritdoc cref="IOpenApi.IsSimulation"/>
     public bool IsSimulation { get; private set; }
 
-    /// <inheritdoc cref="IOpenApi.IsConnected"/>
-    public bool IsConnected { get; private set; }
+    /// <inheritdoc cref="IOpenApi.Connected"/>
+    public bool Connected { get; private set; }
 
     /// <inheritdoc cref="IOpenApi.AccessToken"/>
     public string AccessToken => _authorization;
@@ -63,7 +63,7 @@ public class OpenApi : IOpenApi
     /// <inheritdoc cref="IOpenApi.ConnectAsync"/>/>
     public async Task<bool> ConnectAsync(string appKey, string appSecretKey, string access_token = "", string wss_domain = "")
     {
-        if (IsConnected)
+        if (Connected)
         {
             LastErrorMessage = "Aleady connected";
             return true;
@@ -99,7 +99,12 @@ public class OpenApi : IOpenApi
         }
 
         // 모의투자인지 실투자인지 구분한다
-        var response = await RequestTrAsync<ResponseTrData>("FOCCQ10800", """{"In":{"IsuNo":"","BnsDt":""}}""");
+        var request = new Dictionary<string, object?>()
+        {
+            { "IsuNo", "" },
+            { "BnsDt", "" },
+        };
+        var response = await RequestTrAsync("FOCCQ10800", request);
         if (response == null)
         {
             // 요청 실패
@@ -121,7 +126,7 @@ public class OpenApi : IOpenApi
             _wssClient = new ClientWebSocket();
             if (_wssClient.ConnectAsync(wssUri, CancellationToken.None).Wait(5000))
             {
-                IsConnected = true;
+                Connected = true;
                 _ = WebsocketListen(_wssClient);
                 OnMessageEvent?.Invoke(this, new($"Websocket: Connected.({wssUri})"));
 
@@ -143,11 +148,11 @@ public class OpenApi : IOpenApi
     /// <inheritdoc cref="IOpenApi.CloseAsync"/>
     public async Task CloseAsync()
     {
-        if (IsConnected)
+        if (Connected)
         {
             if (_wssClient is not null && _wssClient.State == WebSocketState.Open)
                 await _wssClient.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
-            IsConnected = false;
+            Connected = false;
         }
     }
 
@@ -183,9 +188,9 @@ public class OpenApi : IOpenApi
     }
     private void OnWssClosed(string message)
     {
-        if (IsConnected)
+        if (Connected)
         {
-            //IsConnected = false;
+            //Connected = false;
             LastErrorMessage = message;
             OnMessageEvent?.Invoke(this, new(LastErrorMessage));
         }
@@ -254,7 +259,7 @@ public class OpenApi : IOpenApi
     /// <inheritdoc cref="IOpenApi.RequestRealtimeAsync"/>/>
     public async Task<bool> RequestRealtimeAsync(string tr_cd, string tr_key, bool bAdd)
     {
-        if (!IsConnected || _wssClient is null || _wssClient.State != WebSocketState.Open)
+        if (!Connected || _wssClient is null || _wssClient.State != WebSocketState.Open)
         {
             LastErrorMessage = "Websocket 연결이 되어 있지 않습니다";
             return false;
@@ -322,7 +327,7 @@ public class OpenApi : IOpenApi
     }
 
     /// <inheritdoc cref="IOpenApi.RequestTrAsync"/>
-    public async Task<T?> RequestTrAsync<T>(string tr_cd, string jsonRequest, string cont_key = "") where T : ResponseTrData
+    public async Task<ResponseTrData?> RequestTrAsync(string tr_cd, IEnumerable<KeyValuePair<string, object?>> indatas, string cont_key = "")
     {
         var trSpec = LibConst.GetTrSpec(tr_cd);
         if (trSpec == null)
@@ -331,17 +336,36 @@ public class OpenApi : IOpenApi
             return default;
         }
 
-        var response = await RequestAsync(trSpec.Path, jsonRequest, cont_key);
-
-        if (response.jsonResponse.Length == 0)
+        var jsonRequest = new StringBuilder();
+        jsonRequest.Append('{');
+        jsonRequest.Append("\"In\":{");
+        bool bFirst = true;
+        foreach (var indata in indatas)
         {
-            LastErrorMessage = $"수신데이터가 없습니다.{tr_cd}";
-            return default;
+            if (bFirst)
+            {
+                bFirst = false;
+            }
+            else
+            {
+                jsonRequest.Append(',');
+            }
+            if (indata.Value is string)
+            {
+                jsonRequest.Append($"\"{indata.Key}\":\"{indata.Value}\"");
+            }
+            else
+            {
+                jsonRequest.Append($"\"{indata.Key}\":{indata.Value}");
+            }
         }
+        jsonRequest.Append("}}");
+
+        var response = await RequestAsync(trSpec.Path, jsonRequest.ToString(), cont_key);
 
         try
         {
-            var dataResponse = JsonSerializer.Deserialize<T>(response.jsonResponse, _jsonOptions);
+            var dataResponse = JsonSerializer.Deserialize<ResponseTrData>(response.jsonResponse, _jsonOptions);
             if (dataResponse is not null)
             {
                 dataResponse.tr_cd = tr_cd;
