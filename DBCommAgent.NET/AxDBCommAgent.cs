@@ -315,7 +315,7 @@ namespace DBCommAgent.NET
     public class _DDBCommAgentEvents_OnAgentEventHandlerEvent(int nEventType, int nParam, string strParam) : EventArgs
     {
         /// <summary>
-        /// CommEvent 종류
+        /// CommAgentEvent 종류
         /// </summary>
         public int nEventType = nEventType;
         /// <summary>
@@ -328,33 +328,6 @@ namespace DBCommAgent.NET
         public string strParam = strParam;
     }
 
-    /// <summary>
-    /// Tran조회응답 이벤트 핸들러
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    public delegate void _DDBCommAgentEvents_OnGetTranDataEventHandler(object sender, _DDBCommAgentEvents_OnGetTranDataEvent e);
-
-    /// <summary>
-    /// FID조회응답 이벤트 핸들러
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    public delegate void _DDBCommAgentEvents_OnGetFidDataEventHandler(object sender, _DDBCommAgentEvents_OnGetFidDataEvent e);
-
-    /// <summary>
-    /// 실시간데이터 수신 이벤트 핸들러
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    public delegate void _DDBCommAgentEvents_OnGetRealDataEventHandler(object sender, _DDBCommAgentEvents_OnGetRealDataEvent e);
-
-    /// <summary>
-    /// Agent로부터 받은 메시지 수신 이벤트 핸들러
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    public delegate void _DDBCommAgentEvents_OnAgentEventHandlerEventHandler(object sender, _DDBCommAgentEvents_OnAgentEventHandlerEvent e);
 
     [ClassInterface(ClassInterfaceType.None)]
     internal class AxDBCommAgentEventMulticaster(AxDBCommAgent parent) : _DDBCommAgentEvents
@@ -381,73 +354,38 @@ namespace DBCommAgent.NET
 
         //private ConnectionPointCookie cookie;
 
-        /// <summary>
-        /// Tran조회응답 이벤트
-        /// </summary>
-        public event _DDBCommAgentEvents_OnGetTranDataEventHandler OnGetTranData;
+        /// <inheritdoc cref="_DDBCommAgentEvents_OnGetTranDataEvent"/>
+        public event EventHandler<_DDBCommAgentEvents_OnGetTranDataEvent> OnGetTranData;
 
-        /// <summary>
-        /// FID조회응답 이벤트
-        /// </summary>
-        public event _DDBCommAgentEvents_OnGetFidDataEventHandler OnGetFidData;
+        /// <inheritdoc cref="_DDBCommAgentEvents_OnGetFidDataEvent"/>
+        public event EventHandler<_DDBCommAgentEvents_OnGetFidDataEvent> OnGetFidData;
 
-        /// <summary>
-        /// 실시간데이터 수신 이벤트
-        /// </summary>
-        public event _DDBCommAgentEvents_OnGetRealDataEventHandler OnGetRealData;
+        /// <inheritdoc cref="_DDBCommAgentEvents_OnGetRealDataEvent"/>
+        public event EventHandler<_DDBCommAgentEvents_OnGetRealDataEvent> OnGetRealData;
 
-        /// <summary>
-        /// Agent로부터 받은 메시지 수신 이벤트
-        /// </summary>
-        public event _DDBCommAgentEvents_OnAgentEventHandlerEventHandler OnAgentEventHandler;
+        /// <inheritdoc cref="_DDBCommAgentEvents_OnAgentEventHandlerEvent"/>
+        public event EventHandler<_DDBCommAgentEvents_OnAgentEventHandlerEvent> OnAgentEventHandler;
 
         /// <summary>
         /// 통신모듈 초기화 및 연결
         /// <para>로그인 처리전에 호출한다.</para>
         /// </summary>
         /// <returns>0 : 성공, 음수 : 오류</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int CommInit()
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("CommInit", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx?.CommInit() ?? throw new InvalidActiveXStateException("CommInit", ActiveXInvokeKind.MethodInvoke);
-        }
+        public virtual int CommInit() => ocx.CommInit();
 
         /// <summary>
         /// 연결 해제
         /// <para>로그아웃 처리 이후에 호출한다.</para>
         /// </summary>
         /// <param name="bSocketClose"></param>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual void CommTerminate(int bSocketClose)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("CommTerminate", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            ocx.CommTerminate(bSocketClose);
-        }
+        public virtual void CommTerminate(int bSocketClose) => ocx.CommTerminate(bSocketClose);
 
         /// <summary>
         /// 통신연결 상태 확인
         /// <para>CommInit 메소드 호출 후 통신연결 상태 확인을 위해 호출한다.</para>
         /// </summary>
         /// <returns></returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int CommGetConnectState()
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("CommGetConnectState", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.CommGetConnectState();
-        }
+        public virtual int CommGetConnectState() => ocx.CommGetConnectState();
 
         /// <summary>
         /// 로그인 처리
@@ -457,16 +395,7 @@ namespace DBCommAgent.NET
         /// <param name="sPwd">로그인 비밀번호</param>
         /// <param name="sCertPwd">공인인증 비밀번호</param>
         /// <returns>0 : 실패, 1 : 성공</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int CommLogin(string sUserID, string sPwd, string sCertPwd)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("CommLogin", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.CommLogin(sUserID, sPwd, sCertPwd);
-        }
+        public virtual int CommLogin(string sUserID, string sPwd, string sCertPwd) => ocx.CommLogin(sUserID, sPwd, sCertPwd);
 
         /// <summary>
         /// 로그아웃 처리
@@ -474,32 +403,14 @@ namespace DBCommAgent.NET
         /// </summary>
         /// <param name="sUserID">로그인 ID</param>
         /// <returns>0 : 실패, 1 : 성공</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int CommLogout(string sUserID)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("CommLogout", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.CommLogout(sUserID);
-        }
+        public virtual int CommLogout(string sUserID) => ocx.CommLogout(sUserID);
 
         /// <summary>
         /// 로그인상태 확인
         /// <para>CommLogin 메소드 호출 이후, 로그인 상태 확인 목적으로 호출한다.</para>
         /// </summary>
         /// <returns>0 : 로그아웃, 1 : 로그인</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int GetLoginState()
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("GetLoginState", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.GetLoginState();
-        }
+        public virtual int GetLoginState() => ocx.GetLoginState();
 
         /// <summary>
         /// 로그인모드 설정
@@ -510,16 +421,7 @@ namespace DBCommAgent.NET
         /// nOption(0)  0:실거래, 1:국내모의, 2:해외모의;
         /// nOption(1)  0:공인인증, 1:시세전용
         /// </param>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual void SetLoginMode(int nOption, int nMode)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("SetLoginMode", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            ocx.SetLoginMode(nOption, nMode);
-        }
+        public virtual void SetLoginMode(int nOption, int nMode) => ocx.SetLoginMode(nOption, nMode);
 
         /// <summary>
         /// 로그인상태 확인
@@ -527,16 +429,7 @@ namespace DBCommAgent.NET
         /// </summary>
         /// <param name="nOption">0 : 모의투자 체크, 1 : 시제전용, 2 : 직원/고객 로그인</param>
         /// <returns>-1 : 실패, 성공 : -1보다 큰 양수</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int GetLoginMode(int nOption)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("GetLoginMode", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.GetLoginMode(nOption);
-        }
+        public virtual int GetLoginMode(int nOption) => ocx.GetLoginMode(nOption);
 
         /// <summary>
         /// Tran조회 I/O Block 정보 리소스파일 로드
@@ -544,16 +437,7 @@ namespace DBCommAgent.NET
         /// </summary>
         /// <param name="strFilePath">Tran I/O Block 정보 리소스파일(*.res) 경로</param>
         /// <returns>0 : 실패, 1 : 성공</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int LoadTranResource(string strFilePath)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("LoadTranResource", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.LoadTranResource(strFilePath);
-        }
+        public virtual int LoadTranResource(string strFilePath) => ocx.LoadTranResource(strFilePath);
 
         /// <summary>
         /// 실시간 Block 정보 리소스파일 로드
@@ -561,32 +445,14 @@ namespace DBCommAgent.NET
         /// </summary>
         /// <param name="strFilePath">실시간Block정보 리소스 파일(*.res) 경로</param>
         /// <returns>0 : 실패, 1 : 성공</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int LoadRealResource(string strFilePath)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("LoadRealResource", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.LoadRealResource(strFilePath);
-        }
+        public virtual int LoadRealResource(string strFilePath) => ocx.LoadRealResource(strFilePath);
 
         /// <summary>
         /// 조회고유ID 생성(Request ID)
         /// <para>Tran/FID조회 시, RQ ID를 먼저 생성한다.</para>
         /// </summary>
         /// <returns>신규 RQ ID 반환(음수 : 실패, 2보다 큰 정수 : 성공)</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int CreateRequestID()
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("CreateRequestID", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.CreateRequestID();
-        }
+        public virtual int CreateRequestID() => ocx.CreateRequestID();
 
         /// <summary>
         /// 조회응답 부가정보/옵션값 반환
@@ -594,29 +460,11 @@ namespace DBCommAgent.NET
         /// </summary>
         /// <param name="nOptionType">CommRecvOpt 값</param>
         /// <returns>nOptionType에 대응하는 문자열값 반환</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual string GetCommRecvOptionValue(int nOptionType)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("GetCommRecvOptionValue", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.GetCommRecvOptionValue(nOptionType);
-        }
+        public virtual string GetCommRecvOptionValue(int nOptionType) => ocx.GetCommRecvOptionValue(nOptionType);
 
         /// <summary>ReleaseRqId</summary>
         /// <param name="nRqId">조회고유ID</param>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual void ReleaseRqId(int nRqId)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("ReleaseRqId", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            ocx.ReleaseRqId(nRqId);
-        }
+        public virtual void ReleaseRqId(int nRqId) => ocx.ReleaseRqId(nRqId);
 
         /// <summary>
         /// Tran조회, 항목별 입력값을 입력한다.
@@ -628,16 +476,7 @@ namespace DBCommAgent.NET
         /// <param name="strItem">Input항목명(Tran 리소스파일(*.res)파일의 'ITEM=' 항목)</param>
         /// <param name="strValue">Input항목에 대응하는 입력값</param>
         /// <returns>0 : 실패, 1 : 성공</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int SetTranInputData(int nRqId, string strTrCode, string strRecName, string strItem, string strValue)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("SetTranInputData", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.SetTranInputData(nRqId, strTrCode, strRecName, strItem, strValue);
-        }
+        public virtual int SetTranInputData(int nRqId, string strTrCode, string strRecName, string strItem, string strValue) => ocx.SetTranInputData(nRqId, strTrCode, strRecName, strItem, strValue);
 
         /// <summary>
         /// Tran조회 요청
@@ -652,16 +491,7 @@ namespace DBCommAgent.NET
         /// <param name="sTranType">Q':조회, 'U':Update(보통 조회는 'Q', 주문 등은 'U'를 입력한다.)</param>
         /// <param name="nRequestCount">조회 응답으로 받을 최대 데이터 건수(Maxium : 9999)</param>
         /// <returns>음수 : 실패, 0보다 큰 정수 : 성공</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int RequestTran(int nRqId, string sTrCode, string sIsBenefit, string sPrevOrNext, string sPrevNextKey, string sScreenNo, string sTranType, int nRequestCount)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("RequestTran", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.RequestTran(nRqId, sTrCode, sIsBenefit, sPrevOrNext, sPrevNextKey, sScreenNo, sTranType, nRequestCount);
-        }
+        public virtual int RequestTran(int nRqId, string sTrCode, string sIsBenefit, string sPrevOrNext, string sPrevNextKey, string sScreenNo, string sTranType, int nRequestCount) => ocx.RequestTran(nRqId, sTrCode, sIsBenefit, sPrevOrNext, sPrevNextKey, sScreenNo, sTranType, nRequestCount);
 
         /// <summary>
         /// Tran조회응답 데이터 건수 반환
@@ -670,16 +500,7 @@ namespace DBCommAgent.NET
         /// <param name="strTrCode">서비스 Tr코드(Tran 리소스파일(*.res)파일의 ' TR_CODE=' 항목)</param>
         /// <param name="strRecName">Input 레코드명(Tran 리소스파일(*.res)파일의 ' RecName=' 항목)</param>
         /// <returns>0 : 데이터 없음, 0보다 큰 정수 : 데이터 건수</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int GetTranOutputRowCnt(string strTrCode, string strRecName)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("GetTranOutputRowCnt", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.GetTranOutputRowCnt(strTrCode, strRecName);
-        }
+        public virtual int GetTranOutputRowCnt(string strTrCode, string strRecName) => ocx.GetTranOutputRowCnt(strTrCode, strRecName);
 
         /// <summary>
         /// Tran조회 항목별 응답데이터 반환
@@ -690,16 +511,7 @@ namespace DBCommAgent.NET
         /// <param name="strItemName"></param>
         /// <param name="nRow"></param>
         /// <returns></returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual string GetTranOutputData(string strTrCode, string strRecName, string strItemName, int nRow)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("GetTranOutputData", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.GetTranOutputData(strTrCode, strRecName, strItemName, nRow);
-        }
+        public virtual string GetTranOutputData(string strTrCode, string strRecName, string strItemName, int nRow) => ocx.GetTranOutputData(strTrCode, strRecName, strItemName, nRow);
 
         /// <summary>
         /// Tran조회 입력 데이터 건수 설정
@@ -710,16 +522,7 @@ namespace DBCommAgent.NET
         /// <param name="strRecName">입력 레코드명</param>
         /// <param name="nRecCnt">데이터 입력 건수</param>
         /// <returns>0 : 실패, 1 : 성공</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int SetTranInputArrayCnt(int nRqId, string strTrCode, string strRecName, int nRecCnt)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("SetTranInputArrayCnt", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.SetTranInputArrayCnt(nRqId, strTrCode, strRecName, nRecCnt);
-        }
+        public virtual int SetTranInputArrayCnt(int nRqId, string strTrCode, string strRecName, int nRecCnt) => ocx.SetTranInputArrayCnt(nRqId, strTrCode, strRecName, nRecCnt);
 
         /// <summary>
         /// Tran조회 복수건 입력
@@ -732,16 +535,7 @@ namespace DBCommAgent.NET
         /// <param name="strValue">입력값</param>
         /// <param name="nArrayIndex">레코드 인덱스(0부터 시작)</param>
         /// <returns>0 : 실패, 1 : 성공</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int SetTranInputArrayData(int nRqId, string strTrCode, string strRecName, string strItem, string strValue, int nArrayIndex)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("SetTranInputArrayData", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.SetTranInputArrayData(nRqId, strTrCode, strRecName, strItem, strValue, nArrayIndex);
-        }
+        public virtual int SetTranInputArrayData(int nRqId, string strTrCode, string strRecName, string strItem, string strValue, int nArrayIndex) => ocx.SetTranInputArrayData(nRqId, strTrCode, strRecName, strItem, strValue, nArrayIndex);
 
         /// <summary>
         /// FID조회 시, 항목별 입력값 입력
@@ -751,16 +545,7 @@ namespace DBCommAgent.NET
         /// <param name="strFID">FID번호(ex-> "9002")</param>
         /// <param name="strValue">FID번호에 대응하는 입력값 (ex-> "000660")</param>
         /// <returns>0 : 실패, 1 : 성공</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int SetFidInputData(int nRqId, string strFID, string strValue)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("SetFidInputData", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.SetFidInputData(nRqId, strFID, strValue);
-        }
+        public virtual int SetFidInputData(int nRqId, string strFID, string strValue) => ocx.SetFidInputData(nRqId, strFID, strValue);
 
         /// <summary>
         /// FID조회 요청 - 응답데이터가 단건(single)
@@ -770,16 +555,7 @@ namespace DBCommAgent.NET
         /// <param name="strOutputFidList">응답으로 받을 FID번호들(ex-> "4,6,5,7,11,28,13,14,15")</param>
         /// <param name="strScreenNo">화면번호 (ex-> "9999")</param>
         /// <returns>음수 : 실패, 1 : 성공 : 2보다 큰 정수</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int RequestFid(int nRqId, string strOutputFidList, string strScreenNo)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("RequestFid", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.RequestFid(nRqId, strOutputFidList, strScreenNo);
-        }
+        public virtual int RequestFid(int nRqId, string strOutputFidList, string strScreenNo) => ocx.RequestFid(nRqId, strOutputFidList, strScreenNo);
 
         /// <summary>
         /// FID조회 요청 - 응답 데이터가 복수건(array)
@@ -792,16 +568,7 @@ namespace DBCommAgent.NET
         /// <param name="strScreenNo">화면변호(ex-> "9999")</param>
         /// <param name="nRequestCount">조회 응답으로 받을 최대 데이터 건수(Maxium : 9999)</param>
         /// <returns>음수 : 실패, 1 : 성공 : 2보다 큰 정수</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int RequestFidArray(int nRqId, string strOutputFidList, string strPreNext, string strPreNextContext, string strScreenNo, int nRequestCount)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("RequestFidArray", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.RequestFidArray(nRqId, strOutputFidList, strPreNext, strPreNextContext, strScreenNo, nRequestCount);
-        }
+        public virtual int RequestFidArray(int nRqId, string strOutputFidList, string strPreNext, string strPreNextContext, string strScreenNo, int nRequestCount) => ocx.RequestFidArray(nRqId, strOutputFidList, strPreNext, strPreNextContext, strScreenNo, nRequestCount);
 
         /// <summary>
         /// FID조회 응답데이터 건수
@@ -809,16 +576,7 @@ namespace DBCommAgent.NET
         /// </summary>
         /// <param name="nRequestId">조회고유ID(Request ID)</param>
         /// <returns>0 : 데이터 없음, 0보다 큰 정수 : 데이터 건수</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int GetFidOutputRowCnt(int nRequestId)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("GetFidOutputRowCnt", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.GetFidOutputRowCnt(nRequestId);
-        }
+        public virtual int GetFidOutputRowCnt(int nRequestId) => ocx.GetFidOutputRowCnt(nRequestId);
 
         /// <summary>
         /// FID조회 항목별 응답 데이터 반환
@@ -828,16 +586,7 @@ namespace DBCommAgent.NET
         /// <param name="strFID">응답 받은 FID번호(ex-> "4")</param>
         /// <param name="nRow">항목값이 위치한 행 인덱스 - 단건(single)  : 0, - 복수건(array) : 해당 행의 인덱스 번호</param>
         /// <returns></returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual string GetFidOutputData(int nRequestId, string strFID, int nRow)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("GetFidOutputData", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.GetFidOutputData(nRequestId, strFID, nRow);
-        }
+        public virtual string GetFidOutputData(int nRequestId, string strFID, int nRow) => ocx.GetFidOutputData(nRequestId, strFID, nRow);
 
         /// <summary>
         /// FID조회 응답데이터 메모리 블럭 포인터
@@ -845,16 +594,7 @@ namespace DBCommAgent.NET
         /// </summary>
         /// <param name="pVVector">응답데이터 접근 데이터 블럭 포인터</param>
         /// <returns>0 : 실패, 1 : 성공</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int GetCommFidDataBlock(long pVVector)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("GetCommFidDataBlock", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.GetCommFidDataBlock(pVVector);
-        }
+        public virtual int GetCommFidDataBlock(long pVVector) => ocx.GetCommFidDataBlock(pVVector);
 
         /// <summary>
         /// 관심종목형(Portfolio) FID조회 시, 항목별 입력값 입력
@@ -864,16 +604,7 @@ namespace DBCommAgent.NET
         /// <param name="strSymbolCode">종목코드</param>
         /// <param name="strSymbolMarket">종목 시장코드</param>
         /// <returns>0 : 실패, 1 : 성공</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int SetPortfolioFidInputData(int nRqId, string strSymbolCode, string strSymbolMarket)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("SetPortfolioFidInputData", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.SetPortfolioFidInputData(nRqId, strSymbolCode, strSymbolMarket);
-        }
+        public virtual int SetPortfolioFidInputData(int nRqId, string strSymbolCode, string strSymbolMarket) => ocx.SetPortfolioFidInputData(nRqId, strSymbolCode, strSymbolMarket);
 
         /// <summary>
         /// 실시간 등록한다.
@@ -882,16 +613,7 @@ namespace DBCommAgent.NET
         /// <param name="strRealName">실시간 등록할 실시간코드명: 실시간 리소스파일(*.res)파일의 ' REAL_NAME=' 항목(ex-> "S00")</param>
         /// <param name="strRealKey">실시간 수신 시 데이터 구분키가 될 값(ex-> "000660" : SK하이닉스 종목코드)</param>
         /// <returns>음수 : 실패, 0 : 성공</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int RegisterReal(string strRealName, string strRealKey)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("RegisterReal", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.RegisterReal(strRealName, strRealKey);
-        }
+        public virtual int RegisterReal(string strRealName, string strRealKey) => ocx.RegisterReal(strRealName, strRealKey);
 
         /// <summary>
         /// 실시간등록 해제한다.
@@ -900,31 +622,13 @@ namespace DBCommAgent.NET
         /// <param name="strRealName">실시간등록 해제할 실시간코드명: 실시간 리소스파일(*.res)파일의 ' REAL_NAME=' 항목(ex-> "S00")</param>
         /// <param name="strRealKey">실시간등록 해제할 실시간등록키(ex-> "000660" : SK하이닉스 종목코드)</param>
         /// <returns>음수 : 실패, 1 : 성공</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int UnRegisterReal(string strRealName, string strRealKey)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("UnRegisterReal", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.UnRegisterReal(strRealName, strRealKey);
-        }
+        public virtual int UnRegisterReal(string strRealName, string strRealKey) => ocx.UnRegisterReal(strRealName, strRealKey);
 
         /// <summary>
         /// 모든 실시간등록 해제한다.
         /// </summary>
         /// <returns>음수 : 실패, 1 : 성공</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int AllUnRegisterReal()
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("AllUnRegisterReal", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.AllUnRegisterReal();
-        }
+        public virtual int AllUnRegisterReal() => ocx.AllUnRegisterReal();
 
         /// <summary>
         /// 항목별 실시간 수신 데이터를 반환한다.
@@ -933,16 +637,7 @@ namespace DBCommAgent.NET
         /// <param name="strRealName">실시간 수신 데이터 실시간코드명: 실시간 리소스파일(*.res)파일의 ' REAL_NAME=' 항목(ex-> "S00")</param>
         /// <param name="strItemName">실시간 리소스파일(*.res)파일의 ' ITEM=' 항목(ex-> " SHRN_ISCD")</param>
         /// <returns>해당 strItemName에 대응하는 데이터값 반환</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual string GetRealOutputData(string strRealName, string strItemName)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("GetRealOutputData", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.GetRealOutputData(strRealName, strItemName);
-        }
+        public virtual string GetRealOutputData(string strRealName, string strItemName) => ocx.GetRealOutputData(strRealName, strItemName);
 
         /// <summary>
         /// 실시간 수신 데이터 메모리 블럭 포인터 제공
@@ -950,91 +645,37 @@ namespace DBCommAgent.NET
         /// </summary>
         /// <param name="pVector">응답데이터 직접 접근에 사용될 메모리 포인터</param>
         /// <returns>0 : 실패, 1 : 성공</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int GetCommRealRecvDataBlock(long pVector)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("GetCommRealRecvDataBlock", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.GetCommRealRecvDataBlock(pVector);
-        }
+        public virtual int GetCommRealRecvDataBlock(long pVector) => ocx.GetCommRealRecvDataBlock(pVector);
 
         /// <summary>
         /// 에러 메시지 확인
         /// <para>API메소드에서 에러가 발생했을 경우, 에러메시지 확인하기 위해 호출한다.</para>
         /// </summary>
         /// <returns>마지막으로 호출된 API메소드에서 에러가 발생했을 경우 에러메시지 반환</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual string GetLastErrMsg()
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("GetLastErrMsg", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.GetLastErrMsg();
-        }
+        public virtual string GetLastErrMsg() => ocx.GetLastErrMsg();
 
         /// <summary>
         /// OpenAPI 에이전트 모듈 파일경로 반환
         /// <para>에이전트 오브젝트 생성 이후에 호출</para>
         /// </summary>
         /// <returns>OpenAPI 에이전트 모듈 파일경로 반환</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual string GetApiAgentModulePath()
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("GetApiAgentModulePath", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.GetApiAgentModulePath();
-        }
+        public virtual string GetApiAgentModulePath() => ocx.GetApiAgentModulePath();
 
         /// <summary>
         /// 계좌비밀번호는 단방향 암호화를 해야된다
         /// </summary>
         /// <param name="strPlainText"></param>
         /// <returns>암호화된 문자열</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual string GetEncrpyt(string strPlainText)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("GetEncrpyt", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.GetEncrpyt(strPlainText);
-        }
+        public virtual string GetEncrpyt(string strPlainText) => ocx.GetEncrpyt(strPlainText);
 
         /// <summary>
         /// 메시지 박스 출력 유/무 설정
         /// </summary>
         /// <param name="nOption">1: off, 0: on</param>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual void SetOffAgentMessageBox(int nOption)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("SetOffAgentMessageBox", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            ocx.SetOffAgentMessageBox(nOption);
-        }
+        public virtual void SetOffAgentMessageBox(int nOption) => ocx.SetOffAgentMessageBox(nOption);
 
         /// <summary>SetOptionalFunction</summary>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual string SetOptionalFunction(int nOption, int nValue1, int nValue2, string strValue1, string strValue2)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("SetOptionalFunction", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.SetOptionalFunction(nOption, nValue1, nValue2, strValue1, strValue2);
-        }
+        public virtual string SetOptionalFunction(int nOption, int nValue1, int nValue2, string strValue1, string strValue2) => ocx.SetOptionalFunction(nOption, nValue1, nValue2, strValue1, strValue2);
 
         /// <summary>
         /// 계좌 정보
@@ -1042,102 +683,39 @@ namespace DBCommAgent.NET
         /// <param name="nOption">0 : 계좌번호, 1 : 계좌상품번호</param>
         /// <param name="szAccNo">계좌번호</param>
         /// <returns>옵션에 해당하는 값</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual string GetAccInfo(int nOption, string szAccNo)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("GetAccInfo", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.GetAccInfo(nOption, szAccNo);
-        }
+        public virtual string GetAccInfo(int nOption, string szAccNo) => ocx.GetAccInfo(nOption, szAccNo);
 
         /// <summary>
         /// 보유계좌 수
         /// </summary>
         /// <returns>보유계좌 수</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual int GetUserAccCnt()
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("GetUserAccCnt", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.GetUserAccCnt();
-        }
+        public virtual int GetUserAccCnt() => ocx.GetUserAccCnt();
 
         /// <summary>
         /// 보유계좌 반환
         /// </summary>
         /// <param name="nIndex">보유계좌 인덱스</param>
         /// <returns>계좌번호반환(종합계좌번호(8) + 계좌상품번호(3))</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual string GetUserAccNo(int nIndex)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("GetUserAccNo", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.GetUserAccNo(nIndex);
-        }
+        public virtual string GetUserAccNo(int nIndex) => ocx.GetUserAccNo(nIndex);
 
         /// <summary>GetLBSIPList</summary>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual string GetLBSIPList()
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("GetLBSIPList", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.GetLBSIPList();
-        }
+        public virtual string GetLBSIPList() => ocx.GetLBSIPList();
 
         /// <summary>
         /// 강제 접속 IP 셋팅
         /// </summary>
         /// <param name="strIP">IP</param>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual void SetConnectIPList(string strIP)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("SetConnectIPList", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            ocx.SetConnectIPList(strIP);
-        }
+        public virtual void SetConnectIPList(string strIP) => ocx.SetConnectIPList(strIP);
 
         /// <summary>SetChangePort</summary>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual void SetChangePort(int bChangePort)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("SetChangePort", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            ocx.SetChangePort(bChangePort);
-        }
+        public virtual void SetChangePort(int bChangePort) => ocx.SetChangePort(bChangePort);
 
         /// <summary>
         /// GetLinkTagData("USER_NO") : 고객번호
         /// </summary>
         /// <param name="strTag"></param>
         /// <returns></returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual string GetLinkTagData(string strTag)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("GetLinkTagData", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.GetLinkTagData(strTag);
-        }
+        public virtual string GetLinkTagData(string strTag) => ocx.GetLinkTagData(strTag);
 
         /// <summary>
         /// 현물 주문
@@ -1156,16 +734,7 @@ namespace DBCommAgent.NET
         /// <param name="strCommdaCode">매체구분코드(API :73고정)</param>
         /// <param name="strOrgOrdNo">원주문번호</param>
         /// <returns>Y성공 N 실패</returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual string SendStockOrder(short nRqId, short nOrderType, string strAccNo, string strAccPwd, string sTrCode, string strHogaGb, int lQty, int lPrice, int bCreditOrder, string strCreditType, string strLoanDate, string strCommdaCode, string strOrgOrdNo)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("SendStockOrder", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.SendStockOrder(nRqId, nOrderType, strAccNo, strAccPwd, sTrCode, strHogaGb, lQty, lPrice, bCreditOrder, strCreditType, strLoanDate, strCommdaCode, strOrgOrdNo);
-        }
+        public virtual string SendStockOrder(short nRqId, short nOrderType, string strAccNo, string strAccPwd, string sTrCode, string strHogaGb, int lQty, int lPrice, int bCreditOrder, string strCreditType, string strLoanDate, string strCommdaCode, string strOrgOrdNo) => ocx.SendStockOrder(nRqId, nOrderType, strAccNo, strAccPwd, sTrCode, strHogaGb, lQty, lPrice, bCreditOrder, strCreditType, strLoanDate, strCommdaCode, strOrgOrdNo);
 
         /// <summary>
         /// 파생 주문
@@ -1181,16 +750,7 @@ namespace DBCommAgent.NET
         /// <param name="strCommdaCode">매체구분코드(API :73고정)</param>
         /// <param name="strOrgOrdNo">원주문번호</param>
         /// <returns></returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual string SendFOOrder(short nRqId, short nOrderType, string strAccNo, string strAccPwd, string sTrCode, string strHogaGb, int lQty, string strPrice, string strCommdaCode, string strOrgOrdNo)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("SendFOOrder", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.SendFOOrder(nRqId, nOrderType, strAccNo, strAccPwd, sTrCode, strHogaGb, lQty, strPrice, strCommdaCode, strOrgOrdNo);
-        }
+        public virtual string SendFOOrder(short nRqId, short nOrderType, string strAccNo, string strAccPwd, string sTrCode, string strHogaGb, int lQty, string strPrice, string strCommdaCode, string strOrgOrdNo) => ocx.SendFOOrder(nRqId, nOrderType, strAccNo, strAccPwd, sTrCode, strHogaGb, lQty, strPrice, strCommdaCode, strOrgOrdNo);
 
         /// <summary>
         /// 야간 파생 주문
@@ -1206,16 +766,7 @@ namespace DBCommAgent.NET
         /// <param name="strCommdaCode">매체구분코드(CME (88)고정)</param>
         /// <param name="strOrgOrdNo">원주문번호</param>
         /// <returns></returns>
-        /// <exception cref="InvalidActiveXStateException"></exception>
-        public virtual string SendNightFOOrder(short nRqId, short nOrderType, string strAccNo, string strAccPwd, string sTrCode, string strHogaGb, int lQty, string strPrice, string strCommdaCode, string strOrgOrdNo)
-        {
-            if (ocx == null)
-            {
-                throw new InvalidActiveXStateException("SendNightFOOrder", ActiveXInvokeKind.MethodInvoke);
-            }
-
-            return ocx.SendNightFOOrder(nRqId, nOrderType, strAccNo, strAccPwd, sTrCode, strHogaGb, lQty, strPrice, strCommdaCode, strOrgOrdNo);
-        }
+        public virtual string SendNightFOOrder(short nRqId, short nOrderType, string strAccNo, string strAccPwd, string sTrCode, string strHogaGb, int lQty, string strPrice, string strCommdaCode, string strOrgOrdNo) => ocx.SendNightFOOrder(nRqId, nOrderType, strAccNo, strAccPwd, sTrCode, strHogaGb, lQty, strPrice, strCommdaCode, strOrgOrdNo);
 
         //protected override void CreateSink()
         //{
@@ -1289,29 +840,6 @@ namespace DBCommAgent.NET
         internal void RaiseOnOnAgentEventHandler(object sender, _DDBCommAgentEvents_OnAgentEventHandlerEvent e)
         {
             OnAgentEventHandler?.Invoke(this, e);
-        }
-
-        internal enum ActiveXInvokeKind
-        {
-            MethodInvoke,
-            PropertyGet,
-            PropertySet,
-        }
-        internal class InvalidActiveXStateException(string name, ActiveXInvokeKind kind) : Exception
-        {
-            private readonly string _name = name;
-            private readonly ActiveXInvokeKind _kind = kind;
-
-            public override string ToString()
-            {
-                return _kind switch
-                {
-                    ActiveXInvokeKind.MethodInvoke => string.Format("AXInvalidMethodInvoke {0}", _name),
-                    ActiveXInvokeKind.PropertyGet => string.Format("AXInvalidPropertyGet {0}", _name),
-                    ActiveXInvokeKind.PropertySet => string.Format("AXInvalidPropertySet {0}", _name),
-                    _ => base.ToString(),
-                };
-            }
         }
 
         // additonal code
@@ -1987,15 +1515,24 @@ namespace DBCommAgent.NET
         /// <returns>실패시 Rows값이 0</returns>
         public virtual CommRecvData GetCommRealRecvDataBlock()
         {
-            var ptr = Marshal.AllocCoTaskMem(Marshal.SizeOf<CommRecvData>());
-            if (GetCommRealRecvDataBlock((long)ptr) != 1)
+            nint ptr = 0;
+            try
+            {
+                ptr = Marshal.AllocCoTaskMem(Marshal.SizeOf<CommRecvData>());
+                if (GetCommRealRecvDataBlock((long)ptr) != 1)
+                {
+                    return default;
+                }
+                return Marshal.PtrToStructure<CommRecvData>(ptr);
+            }
+            catch (Exception)
             {
                 return default;
             }
-            var commRecvData = Marshal.PtrToStructure<CommRecvData>(ptr);
-            Marshal.FreeCoTaskMem(ptr);
-
-            return commRecvData;
+            finally
+            {
+                Marshal.FreeCoTaskMem(ptr);
+            }
         }
         #endregion
     }
@@ -2081,7 +1618,7 @@ namespace DBCommAgent.NET
     /// <summary>
     /// OnAgentEventHandler 이벤트 nEventType 값
     /// </summary>
-    public enum CommEvent
+    public enum CommAgentEvent
     {
         /// <summary>
         /// 연결 완료

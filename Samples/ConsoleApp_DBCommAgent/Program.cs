@@ -1,4 +1,5 @@
 ﻿using CSharp;
+using KFOpenAPI.NET;
 
 namespace ConsoleApp;
 
@@ -22,6 +23,11 @@ class Program
 
     static async void MainStart(nint Hanlde)
     {
+        AxKFOpenAPI axKFOpenAPI = new(Hanlde);
+        int nRet = axKFOpenAPI.CommConnect(0);
+        Console.WriteLine($"CommConnect: {nRet}");
+        Console.ReadLine();
+
         await new SampleBase(Hanlde).Main();
 
         while (true)

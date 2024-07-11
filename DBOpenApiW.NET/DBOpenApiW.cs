@@ -498,30 +498,30 @@ namespace DBOpenApiW.NET
     }
 
 
-    /// <summary>서버통신 후 데이터를 받은 시점을 알려준다.</summary>
-    public delegate void _DDBOpenApiWEvents_OnReceiveTrDataEventHandler(object sender, _DDBOpenApiWEvents_OnReceiveTrDataEvent e);
-    /// <summary>실시간데이터를 받은 시점을 알려준다.</summary>
-    public delegate void _DDBOpenApiWEvents_OnReceiveRealDataEventHandler(object sender, _DDBOpenApiWEvents_OnReceiveRealDataEvent e);
-    /// <summary>서버통신 후 메시지를 받은 시점을 알려준다.</summary>
-    public delegate void _DDBOpenApiWEvents_OnReceiveMsgEventHandler(object sender, _DDBOpenApiWEvents_OnReceiveMsgEvent e);
-    /// <summary>체결데이터를 받은 시점을 알려준다.</summary>
-    public delegate void _DDBOpenApiWEvents_OnReceiveChejanDataEventHandler(object sender, _DDBOpenApiWEvents_OnReceiveChejanDataEvent e);
-    /// <summary>서버 접속 관련 이벤트</summary>
-    public delegate void _DDBOpenApiWEvents_OnEventConnectEventHandler(object sender, _DDBOpenApiWEvents_OnEventConnectEvent e);
-    /// <summary>서버통신 후 데이터를 받은 시점을 알려준다.</summary>
-    public delegate void _DDBOpenApiWEvents_OnDBOAReceiveTrDataEventHandler(object sender, _DDBOpenApiWEvents_OnDBOAReceiveTrDataEvent e);
-    /// <summary>실시간데이터를 받은 시점을 알려준다.</summary>
-    public delegate void _DDBOpenApiWEvents_OnDBOAReceiveRealDataEventHandler(object sender, _DDBOpenApiWEvents_OnDBOAReceiveRealDataEvent e);
-    /// <summary>서버통신 후 메시지를 받은 시점을 알려준다.</summary>
-    public delegate void _DDBOpenApiWEvents_OnDBOAReceiveMsgEventHandler(object sender, _DDBOpenApiWEvents_OnDBOAReceiveMsgEvent e);
-    /// <summary>체결데이터를 받은 시점을 알려준다.</summary>
-    public delegate void _DDBOpenApiWEvents_OnDBOAReceiveChejanDataEventHandler(object sender, _DDBOpenApiWEvents_OnDBOAReceiveChejanDataEvent e);
-    /// <summary>서버 접속 관련 이벤트</summary>
-    public delegate void _DDBOpenApiWEvents_OnDBOAEventConnectEventHandler(object sender, _DDBOpenApiWEvents_OnDBOAEventConnectEvent e);
-    /// <summary>추후 추가 제공될 이벤트</summary>
-    public delegate void _DDBOpenApiWEvents_OnDBOAEventExtendedEventHandler(object sender, _DDBOpenApiWEvents_OnDBOAEventExtendedEvent e);
-    /// <summary>서버 Notify 관련 이벤트</summary>
-    public delegate void _DDBOpenApiWEvents_OnDBOAEventNotifyEventHandler(object sender, _DDBOpenApiWEvents_OnDBOAEventNotifyEvent e);
+    ///// <summary>서버통신 후 데이터를 받은 시점을 알려준다.</summary>
+    //public delegate void _DDBOpenApiWEvents_OnReceiveTrDataEventHandler(object sender, _DDBOpenApiWEvents_OnReceiveTrDataEvent e);
+    ///// <summary>실시간데이터를 받은 시점을 알려준다.</summary>
+    //public delegate void _DDBOpenApiWEvents_OnReceiveRealDataEventHandler(object sender, _DDBOpenApiWEvents_OnReceiveRealDataEvent e);
+    ///// <summary>서버통신 후 메시지를 받은 시점을 알려준다.</summary>
+    //public delegate void _DDBOpenApiWEvents_OnReceiveMsgEventHandler(object sender, _DDBOpenApiWEvents_OnReceiveMsgEvent e);
+    ///// <summary>체결데이터를 받은 시점을 알려준다.</summary>
+    //public delegate void _DDBOpenApiWEvents_OnReceiveChejanDataEventHandler(object sender, _DDBOpenApiWEvents_OnReceiveChejanDataEvent e);
+    ///// <summary>서버 접속 관련 이벤트</summary>
+    //public delegate void _DDBOpenApiWEvents_OnEventConnectEventHandler(object sender, _DDBOpenApiWEvents_OnEventConnectEvent e);
+    ///// <summary>서버통신 후 데이터를 받은 시점을 알려준다.</summary>
+    //public delegate void _DDBOpenApiWEvents_OnDBOAReceiveTrDataEventHandler(object sender, _DDBOpenApiWEvents_OnDBOAReceiveTrDataEvent e);
+    ///// <summary>실시간데이터를 받은 시점을 알려준다.</summary>
+    //public delegate void _DDBOpenApiWEvents_OnDBOAReceiveRealDataEventHandler(object sender, _DDBOpenApiWEvents_OnDBOAReceiveRealDataEvent e);
+    ///// <summary>서버통신 후 메시지를 받은 시점을 알려준다.</summary>
+    //public delegate void _DDBOpenApiWEvents_OnDBOAReceiveMsgEventHandler(object sender, _DDBOpenApiWEvents_OnDBOAReceiveMsgEvent e);
+    ///// <summary>체결데이터를 받은 시점을 알려준다.</summary>
+    //public delegate void _DDBOpenApiWEvents_OnDBOAReceiveChejanDataEventHandler(object sender, _DDBOpenApiWEvents_OnDBOAReceiveChejanDataEvent e);
+    ///// <summary>서버 접속 관련 이벤트</summary>
+    //public delegate void _DDBOpenApiWEvents_OnDBOAEventConnectEventHandler(object sender, _DDBOpenApiWEvents_OnDBOAEventConnectEvent e);
+    ///// <summary>추후 추가 제공될 이벤트</summary>
+    //public delegate void _DDBOpenApiWEvents_OnDBOAEventExtendedEventHandler(object sender, _DDBOpenApiWEvents_OnDBOAEventExtendedEvent e);
+    ///// <summary>서버 Notify 관련 이벤트</summary>
+    //public delegate void _DDBOpenApiWEvents_OnDBOAEventNotifyEventHandler(object sender, _DDBOpenApiWEvents_OnDBOAEventNotifyEvent e);
 
     [ClassInterface(ClassInterfaceType.None)]
     internal class AxDBOpenApiWEventMulticaster(AxDBOpenApiW parent) : _DDBOpenApiWEvents
@@ -564,30 +564,30 @@ namespace DBOpenApiW.NET
 
         //private ConnectionPointCookie cookie;
 
-        /// <summary>서버통신 후 데이터를 받은 시점을 알려준다.</summary>
-        public event _DDBOpenApiWEvents_OnReceiveTrDataEventHandler OnReceiveTrData;
-        /// <summary>실시간데이터를 받은 시점을 알려준다.</summary>
-        public event _DDBOpenApiWEvents_OnReceiveRealDataEventHandler OnReceiveRealData;
-        /// <summary>서버통신 후 메시지를 받은 시점을 알려준다.</summary>
-        public event _DDBOpenApiWEvents_OnReceiveMsgEventHandler OnReceiveMsg;
-        /// <summary>체결데이터를 받은 시점을 알려준다.</summary>
-        public event _DDBOpenApiWEvents_OnReceiveChejanDataEventHandler OnReceiveChejanData;
-        /// <summary>서버 접속 관련 이벤트</summary>
-        public event _DDBOpenApiWEvents_OnEventConnectEventHandler OnEventConnect;
-        /// <summary>서버통신 후 데이터를 받은 시점을 알려준다.</summary>
-        public event _DDBOpenApiWEvents_OnDBOAReceiveTrDataEventHandler OnDBOAReceiveTrData;
-        /// <summary>실시간데이터를 받은 시점을 알려준다.</summary>
-        public event _DDBOpenApiWEvents_OnDBOAReceiveRealDataEventHandler OnDBOAReceiveRealData;
-        /// <summary>서버통신 후 메시지를 받은 시점을 알려준다.</summary>
-        public event _DDBOpenApiWEvents_OnDBOAReceiveMsgEventHandler OnDBOAReceiveMsg;
-        /// <summary>체결데이터를 받은 시점을 알려준다.</summary>
-        public event _DDBOpenApiWEvents_OnDBOAReceiveChejanDataEventHandler OnDBOAReceiveChejanData;
-        /// <summary>서버 접속 관련 이벤트</summary>
-        public event _DDBOpenApiWEvents_OnDBOAEventConnectEventHandler OnDBOAEventConnect;
-        /// <summary>추후 추가 제공될 이벤트</summary>
-        public event _DDBOpenApiWEvents_OnDBOAEventExtendedEventHandler OnDBOAEventExtended;
-        /// <summary>서버 Notify 관련 이벤트</summary>
-        public event _DDBOpenApiWEvents_OnDBOAEventNotifyEventHandler OnDBOAEventNotify;
+        /// <inheritdoc cref="_DDBOpenApiWEvents_OnReceiveTrDataEvent"/>/>
+        public event EventHandler<_DDBOpenApiWEvents_OnReceiveTrDataEvent> OnReceiveTrData;
+        /// <inheritdoc cref="_DDBOpenApiWEvents_OnReceiveRealDataEvent"/>/>
+        public event EventHandler<_DDBOpenApiWEvents_OnReceiveRealDataEvent> OnReceiveRealData;
+        /// <inheritdoc cref="_DDBOpenApiWEvents_OnReceiveMsgEvent"/>/>
+        public event EventHandler<_DDBOpenApiWEvents_OnReceiveMsgEvent> OnReceiveMsg;
+        /// <inheritdoc cref="_DDBOpenApiWEvents_OnReceiveChejanDataEvent"/>/>
+        public event EventHandler<_DDBOpenApiWEvents_OnReceiveChejanDataEvent> OnReceiveChejanData;
+        /// <inheritdoc cref="_DDBOpenApiWEvents_OnEventConnectEvent"/>/>
+        public event EventHandler<_DDBOpenApiWEvents_OnEventConnectEvent> OnEventConnect;
+        /// <inheritdoc cref="_DDBOpenApiWEvents_OnDBOAReceiveTrDataEvent"/>/>
+        public event EventHandler<_DDBOpenApiWEvents_OnDBOAReceiveTrDataEvent> OnDBOAReceiveTrData;
+        /// <inheritdoc cref="_DDBOpenApiWEvents_OnDBOAReceiveRealDataEvent"/>/>
+        public event EventHandler<_DDBOpenApiWEvents_OnDBOAReceiveRealDataEvent> OnDBOAReceiveRealData;
+        /// <inheritdoc cref="_DDBOpenApiWEvents_OnDBOAReceiveMsgEvent"/>/>
+        public event EventHandler<_DDBOpenApiWEvents_OnDBOAReceiveMsgEvent> OnDBOAReceiveMsg;
+        /// <inheritdoc cref="_DDBOpenApiWEvents_OnDBOAReceiveChejanDataEvent"/>/>
+        public event EventHandler<_DDBOpenApiWEvents_OnDBOAReceiveChejanDataEvent> OnDBOAReceiveChejanData;
+        /// <inheritdoc cref="_DDBOpenApiWEvents_OnDBOAEventConnectEvent"/>/>
+        public event EventHandler<_DDBOpenApiWEvents_OnDBOAEventConnectEvent> OnDBOAEventConnect;
+        /// <inheritdoc cref="_DDBOpenApiWEvents_OnDBOAEventExtendedEvent"/>/>
+        public event EventHandler<_DDBOpenApiWEvents_OnDBOAEventExtendedEvent> OnDBOAEventExtended;
+        /// <inheritdoc cref="_DDBOpenApiWEvents_OnDBOAEventNotifyEvent"/>/>
+        public event EventHandler<_DDBOpenApiWEvents_OnDBOAEventNotifyEvent> OnDBOAEventNotify;
 
         /// <summary>
         /// 로그인 창을 실행한다.
@@ -1969,3 +1969,9 @@ namespace DBOpenApiW.NET
         #endregion
     }
 }
+
+
+
+
+
+

@@ -47,17 +47,17 @@ namespace DBCommAgent.NET
 
         private void AxApi_OnGetRealData(object sender, _DDBCommAgentEvents_OnGetRealDataEvent e)
         {
-            throw new NotImplementedException();
+            Debug.WriteLine($"OnGetRealData: strRealName={e.strRealName}, strRealKey={e.strRealKey}, pBlock={e.pBlock}, nBlockLength={e.nBlockLength}");
         }
 
         private void AxApi_OnGetTranData(object sender, _DDBCommAgentEvents_OnGetTranDataEvent e)
         {
-            throw new NotImplementedException();
+            Debug.WriteLine($"OnGetTranData: nRequestId={e.nRequestId}, pBlock={e.pBlock}, nBlockLength={e.nBlockLength}");
         }
 
         private void AxApi_OnGetFidData(object sender, _DDBCommAgentEvents_OnGetFidDataEvent e)
         {
-            throw new NotImplementedException();
+            Debug.WriteLine($"OnGetFidData: nRequestId={e.nRequestId}, pBlock={e.pBlock}, nBlockLength={e.nBlockLength}");
         }
 
         public bool Login(string UserId, string Password, string CertPwd)
