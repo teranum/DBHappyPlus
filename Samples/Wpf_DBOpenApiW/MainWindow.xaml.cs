@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using DBOpenApiW.NET;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Interop;
 
@@ -17,6 +18,9 @@ namespace WpfApp1
         public MainWindow()
         {
             InitializeComponent();
+
+            Title += $" - {(Environment.Is64BitProcess ? "64비트" : "32비트")}";
+
             DataContext = this;
             OutLog("Inited");
 
@@ -104,7 +108,7 @@ namespace WpfApp1
 
             if (content.Equals("시장종목"))
             {
-                OutLog($"DBOAGetAPIModulePath: {api.DBOAGetAPIModulePath()}");
+                OutLog($"DBOAGetAPIModulePath: {Path.GetFullPath(api.DBOAGetAPIModulePath())}");
 
                 OutLog($"DBOAGetGlobalFutureItemlist: {api.DBOAGetGlobalFutureItemlist()}");
 
