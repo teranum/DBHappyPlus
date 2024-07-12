@@ -34,11 +34,11 @@ namespace WpfApp1
             api.OnDBOAEventExtended += Api_OnDBOAEventExtended;
             api.OnDBOAEventConnect += Api_OnDBOAEventConnect;
 
-            UserId = Secret.유저아이디;
-            Password = Secret.비번;
-            CertPass = Secret.공인비번;
+            UserId = Secret.UserId;
+            Password = Secret.Password;
+            CertPass = Secret.CertPwd;
 
-            ItemCode = "HSIG24";
+            ItemCode = "HSIU24";
         }
 
         private void Api_OnDBOAReceiveTrData(object sender, _DDBOpenApiWEvents_OnDBOAReceiveTrDataEvent e)
