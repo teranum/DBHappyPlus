@@ -1367,7 +1367,7 @@ namespace DBOpenApiW.NET
         /// </summary>
         /// <returns>0:성공, 이외 값은 실패</returns>
         /// <remarks>
-        /// 로그인이 성공하거나 실패하는 경우 OnEventConnect 이벤트가 발생하고 
+        /// 로그인이 성공하거나 실패하는 경우 OnDBOAEventConnect 이벤트가 발생하고 
         /// 이벤트의 인자 값으로 로그인 성공 여부를 알 수 있다.
         /// </remarks>
         /// <exception cref="InvalidActiveXStateException"></exception>

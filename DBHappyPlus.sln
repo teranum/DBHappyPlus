@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
+# 17
 VisualStudioVersion = 17.10.34607.79
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DBCommAgent.NET", "DBCommAgent.NET\DBCommAgent.NET.csproj", "{EE4980F6-BDA3-47AA-AB8E-15AF65268648}"
@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wpf_DBCommAgent", "Samples\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wpf_DBOpenApiW", "Samples\Wpf_DBOpenApiW\Wpf_DBOpenApiW.csproj", "{A0B3DD6E-E6FE-4289-8B7B-717ABED2715D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBOpenApi.NET", "DBOpenApi.NET\DBOpenApi.NET.csproj", "{364DD4A5-3847-412E-A9D2-F6CA75EB941F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DBOpenApi.NET", "DBOpenApi.NET\DBOpenApi.NET.csproj", "{364DD4A5-3847-412E-A9D2-F6CA75EB941F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

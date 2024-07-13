@@ -91,7 +91,7 @@ namespace WpfApp1
         {
             int ret = api.DBOACommLogin(UserId, Password, CertPass, 1);
 
-            OutLog($"returned DBOACommConnect: {ret}");
+            OutLog($"returned DBOACommLogin: {ret}");
         }
 
         public IList<string> Logs { get; } = new ObservableCollection<string>();
